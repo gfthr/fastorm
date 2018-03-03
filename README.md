@@ -6,7 +6,7 @@ Forget hibernate and mybatis it, fastOrm will achieve the best Java and Orm base
 
 现在的初步想法：
 
-1）重度使用Redis作为缓存，所有对数据库的访问都必须通过缓存，用reidis 的 KV缓存来实现对象的缓存，用reidis 的 Zset 实现查询的缓存；缓存实现防穿透，防雪崩的机制
+1）重度使用Redis作为缓存，所有对数据库的访问都必须通过缓存，用reidis 的 KV缓存来实现实体对象的缓存，用reidis 的 Zset 实现查询的缓存；缓存实现防穿透，防雪崩的机制
 
 2）不支持一对多、一对一等关联关系，这类东西在高并发网站不需要
 
