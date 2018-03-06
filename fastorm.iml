@@ -82,5 +82,8 @@
     <orderEntry type="library" name="Maven: asm:asm-tree:2.2.3" level="project" />
     <orderEntry type="library" name="Maven: asm:asm-util:2.2.3" level="project" />
     <orderEntry type="library" name="Maven: cglib:cglib-nodep:2.1_3" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.commons:commons-lang3:3.7" level="project" />
+    <orderEntry type="library" name="Maven: commons-collections:commons-collections:3.2.2" level="project" />
+    <orderEntry type="library" name="Maven: com.alibaba:fastjson:1.2.13" level="project" />
   </component>
 </module>

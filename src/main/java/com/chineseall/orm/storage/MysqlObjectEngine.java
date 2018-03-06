@@ -1,5 +1,6 @@
 package com.chineseall.orm.storage;
 
+import com.alibaba.fastjson.JSON;
 import com.chineseall.orm.Model;
 import com.chineseall.orm.exception.ActiveRecordException;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -88,15 +89,11 @@ public class MysqlObjectEngine extends AbstractMysqlEngine{
         for (int i = 0; i < attr_names.length; i++) {
             String attr_name = attr_names[i];
             value = result_dict.get(attr_name);
+            if(value instanceof Map || value instanceof List){
+                value = JSON.toJSONString(value);
+            }
             result_list[i]=value;
         }
-
-//        if isinstance(value, (dict, list)):
-//        value = ujson.dumps(value)
-//        if isinstance(value, float):
-//        value = "%.6f" % value
-
-
         return result_list;
     }
 
