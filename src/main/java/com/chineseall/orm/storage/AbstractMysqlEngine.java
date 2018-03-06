@@ -1,0 +1,404 @@
+package com.chineseall.orm.storage;
+
+import com.chineseall.orm.ConvertUtil;
+import com.chineseall.orm.DaoSupport;
+import com.chineseall.orm.Model;
+import com.chineseall.orm.ModelMeta;
+import com.chineseall.orm.exception.ActiveRecordException;
+import org.springframework.util.StringUtils;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Created by wangqiang on 2018/3/5.
+ * 提供基本的 SQL 生成和数据库操作。
+ */
+public abstract class AbstractMysqlEngine implements ModelEngine{
+    DaoSupport dao = new DaoSupport(null);
+    protected String table;
+    protected String view;
+    protected String delete_mark;
+    protected Class model_class;
+
+    public AbstractMysqlEngine(Class model_class, String table, String delete_mark, String view){
+        if((!StringUtils.isEmpty(table) ||!StringUtils.isEmpty(table)) && !StringUtils.isEmpty(view)){
+            //TODO
+            new ActiveRecordException("both (table or delete_mark) and view are set").printStackTrace();
+        }
+        this.table = table;
+        this.delete_mark = delete_mark;
+        this.view = view;
+        this.model_class = model_class;
+    }
+
+
+
+    protected String _sql_table(){
+        return "`"+this.table+"`";
+    }
+
+    protected String[] _key_column_names(){
+        ModelMeta meta = ModelMeta.getModelMeta(this.model_class);
+        String[] key_column_names = new String[meta.idFields.length];
+        for (int i=0;i<meta.idFields.length;i++){
+            key_column_names[i] = meta.idFields[i].getName();
+        }
+        return key_column_names;
+    }
+
+    protected String[] _column_names(){
+        ModelMeta meta = ModelMeta.getModelMeta(this.model_class);
+        String[] _column_names = new String[meta.columnFields.length];
+        for (int i=0;i<meta.columnFields.length;i++){
+            _column_names[i] = meta.columnFields[i].getName();
+        }
+        return _column_names;
+    }
+
+    protected Object[] getKeyValue(Map<String,Object> data_dict){
+        ModelMeta meta = ModelMeta.getModelMeta(this.model_class);
+        Object[] key_values = new String[meta.idFields.length];
+        for (int i=0;i<meta.idFields.length;i++){
+            key_values[i] = data_dict.get(meta.idFields[i].getName());
+        }
+        return key_values;
+    }
+
+
+    protected Object[] arrayChain(Object[] array1,Object[] array2){
+        Object[] array_new = new String[array1.length + array2.length];
+        System.arraycopy(array1, 0, array_new, 0, array1.length);
+        System.arraycopy(array2, 0, array_new, array1.length, array2.length);
+        return array_new;
+    }
+
+    protected String _sql_condition(){
+        ModelMeta meta = ModelMeta.getModelMeta(this.model_class);
+        String[]  keys= new String[meta.idFields.length];
+        for (int i=0;i<meta.idFields.length;i++){
+            keys[i] = " "+meta.idFields[i].getName()+"=%s ";
+        }
+        return StringUtils.arrayToDelimitedString(keys,"AND");
+    }
+
+    protected String _sql_select_condition(){
+        if (StringUtils.isEmpty(this.delete_mark)){
+            return this._sql_condition();
+        }
+        //`key-column1`=%s AND`key-column2`=%s AND`delete_mark`=0
+        return String.format("%s AND`%s`=0",this._sql_condition(), this.delete_mark);
+    }
+
+    protected String _gen_sql_columns(String[] names){
+        //`column1`,`column2`
+        String columns[] = new String[names.length];
+        for (int i=0;i<names.length;i++){
+            columns[i] = "`"+names[i]+"`";
+        }
+        return StringUtils.arrayToDelimitedString(columns,",");
+    }
+
+    protected String _sql_delete(){
+        // UPDATE `table` SET `delete`=1 WHERE `column`=%s AND`column2`=%s
+        // 或
+        // DELETE FROM `table` WHERE `column`=%s AND`column2`=%s
+        if (!StringUtils.isEmpty(this.delete_mark)){
+            String sql_set_delete = "`"+this.delete_mark+"`=1" ;
+            return String.format("UPDATE %s SET %s WHERE %s",this._sql_table(),sql_set_delete,this._sql_condition());
+        }else{
+            return String.format("DELETE FROM %s WHERE %s",this._sql_table(),this._sql_condition());
+        }
+    }
+
+    protected String _sql_update(){
+        // 因为 SET 部分要根据变化的属性来动态生成，所以这里要把 % 逆转换一下
+        // UPDATE `table` SET %s WHERE `name1`=%%s AND`name2`=%%s
+        String condition_stub = this._sql_condition().replace("%", "%%");
+        return "UPDATE "+this._sql_table()+" SET %s WHERE "+ condition_stub;
+    }
+
+    protected String _sql_select(){
+        // SELECT `column1`,`column2` FROM `table`
+        // WHERE `column3`=%s AND`column4`=%s
+        String[] select_columns = this._get_column_names_for_select_();
+        return String.format("SELECT %s FROM %s WHERE %s", this._gen_sql_columns(select_columns), this._sql_table(), this._sql_select_condition());
+    }
+
+    protected String _sql_insert_with_key(){
+        // INSERT INTO `table` (`key-column`,`value-column`) VALUES (%s,%s)
+        ModelMeta meta = ModelMeta.getModelMeta(this.model_class);
+        String[] key_column_names = _key_column_names();
+        String[] value_column_names = this._get_column_names_for_insert_();
+        // 约定：key 在前，value 在后
+        String[] column_names = (String[])arrayChain(key_column_names, value_column_names);
+        return this._gen_sql_insert(column_names);
+    }
+
+    protected String _sql_insert_without_key(){
+        // INSERT INTO `table` (`value-column1`,`value-column2`) VALUES (%s,%s)
+        String[]  value_column_names = this._get_column_names_for_insert_();
+        return this._gen_sql_insert(value_column_names);
+    }
+
+    protected String _gen_sql_insert(String[] column_names){
+        // INSERT INTO `table` (`column1`,`column2`) VALUES (%s,%s)
+        String[] tmp = new String[column_names.length];
+        for (int i = 0; i < column_names.length ; i++) {
+            tmp[i] ="%s";
+        }
+        String sql_value_stub = StringUtils.arrayToDelimitedString(tmp,",");
+        return String.format("INSERT INTO %s (%s) VALUES (%s)", this._sql_table(), this._gen_sql_columns(column_names),sql_value_stub);
+    }
+
+    protected Map<String,Object> _fetch_row_(Object[] key) throws ActiveRecordException{
+        List<Map<String,Object>> rows = null;
+
+        if(!StringUtils.isEmpty(this.table)){
+            rows = dao.select(this._sql_select(), key,0,0);
+        }else if (!StringUtils.isEmpty(this.view)){
+            rows = dao.select(this.view, key,0,0);
+        }
+
+        Map<String,Object> result_dict =null;
+        if (rows==null){
+            result_dict =null;
+        }else if(rows.size()>1){
+            throw  new ActiveRecordException("Multiple rows returned for fetch() query");
+        }else{
+            result_dict = rows.get(0);
+        }
+        return result_dict;
+
+    }
+
+    public Object model_class_create(Object[] key, Object result_data)throws ActiveRecordException{
+        Object result = null;
+        try {
+            Method createMethod = this.model_class.getMethod("create", new Class[]{Class.class, Object[].class, HashMap.class});
+            result = createMethod.invoke(null, new Object[]{this.model_class, key, result_data});
+        }catch (Exception ex){
+            throw new ActiveRecordException("fetch error :"+ex.getMessage());
+        }
+        return result;
+    }
+
+    public Object fetch(Object[] key, boolean auto_create) throws ActiveRecordException {
+        Object result= null;
+        try {
+            Map<String,Object> result_row = this._fetch_row_(key);
+            Object result_data =null;
+            if(result_row!=null){
+                result_data = this._row_to_value_(result_row);
+            }
+            if (result_data!=null) {
+                return model_class_create(key, result_data);
+            }
+
+            if (!auto_create)
+                return null;
+
+            // auto_create
+            boolean insert_conflict = false; // mark if successful in save
+            Object instance = model_class_create(key, null);
+
+            try {
+                this.save(instance);
+            }catch (Exception e){
+//                if e.args[0] != SQLErrorCode.ER_DUP_ENTRY:
+                insert_conflict = true;
+            }
+
+            if (!insert_conflict){
+                return instance; //successfully saved
+            }
+            //conflict in save, re-fetch instance
+            result_row = this._fetch_row_(key);
+            result_data =null;
+            if(result_row!=null){
+                result_data = this._row_to_value_(result_row);
+            }
+            if (result_data ==null){
+                throw new ActiveRecordException("None in re-fetch auto_create instance");
+            }
+            return model_class_create(key, result_data);
+
+        }catch (Exception ex){
+            throw new ActiveRecordException("fetch error :"+ex.getMessage());
+        }
+//        return result;
+    }
+
+    protected String _sql_multi_select_columns(){
+        // `key-column1`,`key-column2`,`value-column1`,`value-column2`
+        String[] key_columns = _key_column_names();
+        String[] value_columns = this._get_column_names_for_select_();
+        String[] columns = (String[])arrayChain(key_columns, value_columns);
+        return this._gen_sql_columns(columns);
+    }
+
+    protected String _sql_multi_select_by_in(){
+        // SELECT `key-column`,`value-column` FROM `table`
+        // WHERE `condition-column` IN (%s) AND`delete_mark`=0
+        String[] key_columns = _key_column_names();
+        String condition = "`"+key_columns[0]+"`IN(%s)" ;
+        if(!StringUtils.isEmpty(this.delete_mark)){
+            condition = String.format("%s AND`%s`=0",condition,this.delete_mark);
+        }
+        return String.format("SELECT %s FROM %s WHERE %s",this._sql_multi_select_columns(),this._sql_table(), condition);
+    }
+
+    protected String _sql_multi_select_within_union(){
+        // SELECT `key-column1`,`key-column2`,`value-column` FROM `table`
+        // WHERE `key-column1`=%s AND`key-column2`=%s AND`delete_mark`=0
+        return String.format("(SELECT %s FROM %s WHERE %s)", this._sql_multi_select_columns(), this._sql_table(), this._sql_select_condition());
+    }
+
+    protected String _gen_sql_multi_select_by_union(int count){
+        // (SELECT ...) UNION (SELECT ...)
+        String[] sql_selects = new String[count];
+        for (int i=0;i<count;i++){
+            sql_selects[i] = this._sql_multi_select_within_union();
+        }
+        return StringUtils.arrayToDelimitedString(sql_selects, " UNION ALL ");
+    }
+
+    protected List<Map<String,Object>> _fetch_rows_(Object[][] tuple_keys) throws ActiveRecordException {
+
+        List<Map<String,Object>> rows = new ArrayList<Map<String,Object>>();
+        int count = tuple_keys.length;
+        if (count==0){
+            return rows;
+        }
+
+        if(!StringUtils.isEmpty(this.view)){
+            //对于视图形式的查询，无法一次性从数据库查出，使用循环来替代
+            String sql = this.view;
+            for (Object[] tuple_key :tuple_keys){
+                List<Map<String,Object>> _rows = null;
+                _rows = dao.select(this._sql_select(), tuple_key,0,0);
+                if(_rows.size()>1){
+                    throw new ActiveRecordException("Multiple rows returned for fetch() query");
+                }
+                rows.add(_rows.get(0));
+            }
+            return rows;
+        }
+        String[] key_columns = _key_column_names();
+
+        if ((key_columns.length) == 1){
+            Object[] sql_params =new Object[tuple_keys.length];
+            for (int i=0;i<tuple_keys.length;i++) {
+                sql_params[i] = tuple_keys[i][0];
+            }
+
+            String[] sql_in_array = new String[count];
+            for (int i=0;i<count;i++){
+                sql_in_array[i] = "%s";
+            }
+            String sql_in = StringUtils.arrayToDelimitedString(sql_in_array,",");
+            String sql = String.format(this._sql_multi_select_by_in(),sql_in);
+            rows = dao.select(sql, sql_params,0,0);
+        }else{
+            Object[] sql_params = new Object[count*key_columns.length];
+            for (int i=0;i<tuple_keys.length;i++) {
+                for (int j = 0; j < key_columns.length; j++) {
+                    sql_params[i+j] = tuple_keys[i][j];
+                }
+            }
+            String sql = this._gen_sql_multi_select_by_union(count);
+            rows = dao.select(sql, sql_params,0,0);
+        }
+        // 将 rows 按 tuple_keys 排序
+//        extract_key = lambda row: tuple(row[name] for name in identifier)
+//        rows_dict = {extract_key(row): row for row in rows}
+//        rows = [rows_dict.get(tuple_key) for tuple_key in tuple_keys]
+        return rows;
+    }
+
+
+    public void save(Object instance) throws ActiveRecordException{
+        if(!StringUtils.isEmpty(this.view)){
+            throw new ActiveRecordException("put unsaved entity to view");
+        }
+        if(!(instance instanceof Model)){
+            throw new ActiveRecordException("instance must be Model");
+        }
+
+        int row_count=0 ;
+        Model model =(Model)instance;
+
+        String[] key_columns = _key_column_names();
+        Object[] tuple_key = model.tuple_key();
+
+        if (model.isModel_saved()){
+            //该实体在数据库中已有对应数据，将更新过的属性保存到数据库
+            Object[] column_result = this._get_columns_for_update_(model);
+            String[] column_names = (String[])column_result[0];
+            Object[] column_values= (Object[])column_result[1];
+
+            if (column_names ==null)
+                throw new ActiveRecordException("empty update_columns for put()");
+
+            String[] sql_set =new String[column_names.length];
+            for (int i=0;i<column_names.length;i++){
+                sql_set[i] =  "`"+column_names[i]+"`=%s";
+            }
+            String str_sql_set = StringUtils.arrayToDelimitedString(sql_set,",");
+            // UPDATE `table` SET `column1`=%s,`column2`=%s
+            // WHERE `key1`=%s AND`key2`=%s
+            String sql_update = String.format(this._sql_update(),str_sql_set);
+            String[] values = (String[]) arrayChain(column_values, tuple_key);
+            row_count = dao.execute(sql_update,values);
+
+        }else{
+            ModelMeta meta = ModelMeta.getModelMeta(this.model_class);
+            //在数据库中并未有对应的数据，执行插入操作
+            Object[] column_values = this._get_column_values_for_insert_(model);
+
+            if(key_columns.length==1 && tuple_key[0]==null){
+                //只有单个 key 且为空，由数据库生成 key 并设回实体中
+                row_count = dao.execute(this._sql_insert_without_key(),column_values);
+
+                Object last_id = dao.executeScalar("select last_insert_id()", null);
+                Object id = ConvertUtil.castFromObject(last_id.toString(), meta.idFields[0].getType());
+
+                meta.setFieldValue(this.model_class,meta.idFields[0].getName(),model,id);
+            } else {
+                // 有多个 key，或者有指定 key 的值，把 key 和属性直接插入数据库
+                // 注：虽然这里支持多个 key 的插入，但不能用这些 key 作为主键
+                // 表里必须要有额外的主键
+                Object[] values = arrayChain(tuple_key, column_values);
+                row_count=  dao.execute(this._sql_insert_with_key(),values);
+            }
+        }
+        if (row_count != 1)
+            throw new ActiveRecordException("affect "+row_count+" rows in put-insert");
+    }
+
+    public void delete(Object[] key_values) throws ActiveRecordException{
+        if(!StringUtils.isEmpty(this.view)){
+            return;
+        }
+        try {
+            dao.execute(this._sql_delete(),key_values);
+        }catch (Exception ex){
+            throw new ActiveRecordException("delete error:"+ ex.getMessage());
+        }
+
+    }
+
+    protected abstract String[] _get_column_names_for_select_();
+
+    protected abstract Object[] _get_columns_for_update_(Model model);
+
+    protected abstract String[] _get_column_names_for_insert_();
+
+    protected abstract Object[] _get_column_values_for_insert_(Model model);
+
+    protected abstract Object _row_to_value_( Map<String,Object> row_dict);
+
+}

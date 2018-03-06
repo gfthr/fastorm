@@ -1,0 +1,8 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.demo.mybatis_mongodb_mq_redis.daos.MybatisMapper">
+
+    <select id="getList" resultType="Mybatis">
+        SELECT id,name,sex FROM mybatis
+    </select>
+
+</mapper>
