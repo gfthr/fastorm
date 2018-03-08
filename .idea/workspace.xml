@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d8d8f55a-da49-478c-89bb-0952be7c4cd9" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.gitignore" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/encodings.xml" afterPath="$PROJECT_DIR$/.idea/encodings.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/chineseall/orm/Model.java" afterPath="$PROJECT_DIR$/src/main/java/com/chineseall/orm/Model.java" />
@@ -59,8 +60,8 @@
       <file leaf-file-name="ModelProxy.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/chineseall/orm/ModelProxy.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.95811516">
-              <caret line="72" column="73" selection-start-line="72" selection-start-column="73" selection-end-line="72" selection-end-column="73" />
+            <state vertical-scroll-proportion="0.82722515">
+              <caret line="67" column="51" selection-start-line="67" selection-start-column="51" selection-end-line="67" selection-end-column="51" />
               <folding />
             </state>
           </provider>
@@ -1124,12 +1125,12 @@
       <updated>1520214242906</updated>
       <workItem from="1520214246912" duration="43871000" />
       <workItem from="1520329949201" duration="6058000" />
-      <workItem from="1520496162613" duration="3939000" />
+      <workItem from="1520496162613" duration="4017000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="53868000" />
+    <option name="totallyTimeSpent" value="53946000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1366" height="693" extended-state="6" />
@@ -1664,8 +1665,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/chineseall/orm/ModelProxy.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.95811516">
-          <caret line="72" column="73" selection-start-line="72" selection-start-column="73" selection-end-line="72" selection-end-column="73" />
+        <state vertical-scroll-proportion="0.82722515">
+          <caret line="67" column="51" selection-start-line="67" selection-start-column="51" selection-end-line="67" selection-end-column="51" />
           <folding />
         </state>
       </provider>
