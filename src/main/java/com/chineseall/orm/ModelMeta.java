@@ -9,9 +9,7 @@ import com.chineseall.orm.field.ColumnField;
 import com.chineseall.orm.field.IdField;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class ModelMeta {
     public String table;
@@ -22,6 +20,9 @@ public class ModelMeta {
     public boolean autoCreatable;
     public IdField[] idFields;
     public ColumnField[] columnFields;
+
+    public Set<String> idFieldsSet;
+    public Set<String> columnSet;
 
     // TODO 需要加缓存
     public static ModelMeta getModelMeta(Class<?> clasz) {
@@ -36,7 +37,8 @@ public class ModelMeta {
 
         List<ColumnField> columnFields = new ArrayList<ColumnField>();
         List<IdField> idFields = new ArrayList<IdField>();
-        HashSet<String> idFieldsSet = new HashSet<String>();
+        modelMeta.idFieldsSet = new HashSet<String>();
+        modelMeta.columnSet = new HashSet<String>();
 
         for (Field f : clasz.getDeclaredFields()) {
             Id id = f.getAnnotation(Id.class);
@@ -46,7 +48,7 @@ public class ModelMeta {
                 field.setType(f.getType());
                 field.setField(f);
                 idFields.add(field);
-                idFieldsSet.add(f.getName());
+                modelMeta.idFieldsSet.add(f.getName());
             }
             Column column = f.getAnnotation(Column.class);
             if (column != null) {
@@ -55,12 +57,13 @@ public class ModelMeta {
                 field.setType(f.getType());
                 field.setField(f);
                 field.setDefault_value(column.default_value());
-                if(idFieldsSet.contains(f.getName())){
+                if(modelMeta.idFieldsSet.contains(f.getName())){
                     field.setIdField(true);
                 }else{
                     field.setIdField(false);
                 }
                 columnFields.add(field);
+                modelMeta.columnSet.add(f.getName());
             }
         }
         modelMeta.columnFields = columnFields.toArray(new ColumnField[columnFields.size()]);

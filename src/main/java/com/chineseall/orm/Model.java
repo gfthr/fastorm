@@ -31,6 +31,7 @@ public class Model {
 
     public void markFlushed() {
         this.modified = false;
+        modified_attrs.clear();
     }
 
     public boolean isModified() {

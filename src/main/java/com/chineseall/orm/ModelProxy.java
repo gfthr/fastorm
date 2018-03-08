@@ -33,8 +33,8 @@ public class ModelProxy implements MethodInterceptor{
             obj = target;
         }
         if (method.getName().startsWith("get")){
-            String fieldName = OrmInfo.getFieldName(method.getName());
-            OrmInfo orm = OrmInfo.getOrmInfo(clasz);
+//            String fieldName = OrmInfo.getFieldName(method.getName());
+//            OrmInfo orm = OrmInfo.getOrmInfo(clasz);
 
 //            HasManyField hasManyField = orm.getHasManyField(fieldName);
 //            if (hasManyField != null){
@@ -63,7 +63,18 @@ public class ModelProxy implements MethodInterceptor{
 //                }
 //            }
         }else if(method.getName().startsWith("set")){
-            System.out.print(">>>>:"+method.getName());
+            ModelMeta meta = ModelMeta.getModelMeta(clasz);
+            String fieldName = ModelMeta.getFieldName(method.getName());
+            if(meta.columnSet.contains(fieldName)){
+                Object oldFieldValue = ModelMeta.getFieldValue(clasz,fieldName,obj);
+                Object newFieldValue = args[0];
+                if(!oldFieldValue.equals(newFieldValue)){
+                    if(obj instanceof Model){
+                        ((Model) obj).getModified_attrs().add(fieldName);
+                    }
+                }
+                System.out.print(">>>>:"+method.getName());
+            }
         }
         
         if (target == null){
