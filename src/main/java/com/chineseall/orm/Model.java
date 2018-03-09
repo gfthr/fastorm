@@ -44,6 +44,11 @@ public class Model {
         return modified_attrs;
     }
 
+    public Map<String,Object> demodelize(){
+        ModelMeta meta = ModelMeta.getModelMeta(model_engine.getModelClass());
+        return this.dump(meta.get_column_names());
+    }
+
     public Map<String,Object> dump(String[] attrs){
         //指定属性导出成原始类型或 dict、list。
         Map<String,Object> result_dict = new HashMap<String,Object>();

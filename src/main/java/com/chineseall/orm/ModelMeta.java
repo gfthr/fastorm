@@ -29,6 +29,22 @@ public class ModelMeta {
         metaCache=new HashMap<Class<?>,ModelMeta>();
     }
 
+    public String[] get_key_column_names(){
+        String[] key_column_names = new String[this.idFields.length];
+        for (int i=0;i<this.idFields.length;i++){
+            key_column_names[i] = this.idFields[i].getName();
+        }
+        return key_column_names;
+    }
+
+    public String[] get_column_names(){
+        String[] _column_names = new String[this.columnFields.length];
+        for (int i=0;i<this.columnFields.length;i++){
+            _column_names[i] = this.columnFields[i].getName();
+        }
+        return _column_names;
+    }
+
 
     public static ModelMeta getModelMeta(Class<?> clasz) {
         if(metaCache.containsKey(clasz)){

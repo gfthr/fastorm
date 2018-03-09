@@ -38,23 +38,13 @@ public abstract class AbstractMysqlEngine extends ModelEngine{
 
     protected String[] _key_column_names(){
         ModelMeta meta = ModelMeta.getModelMeta(this.model_class);
-        String[] key_column_names = new String[meta.idFields.length];
-        for (int i=0;i<meta.idFields.length;i++){
-            key_column_names[i] = meta.idFields[i].getName();
-        }
-        return key_column_names;
+        return meta.get_key_column_names();
     }
 
     protected String[] _column_names(){
         ModelMeta meta = ModelMeta.getModelMeta(this.model_class);
-        String[] _column_names = new String[meta.columnFields.length];
-        for (int i=0;i<meta.columnFields.length;i++){
-            _column_names[i] = meta.columnFields[i].getName();
-        }
-        return _column_names;
+        return meta.get_column_names();
     }
-
-
 
     protected String _sql_condition(){
         ModelMeta meta = ModelMeta.getModelMeta(this.model_class);

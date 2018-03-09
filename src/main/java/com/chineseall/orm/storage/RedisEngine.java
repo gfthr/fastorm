@@ -1,5 +1,6 @@
 package com.chineseall.orm.storage;
 
+import com.alibaba.fastjson.JSON;
 import com.chineseall.orm.Model;
 import com.chineseall.orm.RedisClient;
 import com.chineseall.orm.exception.ActiveRecordException;
@@ -12,10 +13,10 @@ import java.util.Map;
 /**
  * Created by wangqiang on 2018/3/5.
  */
-public abstract class AbstractRedisEngine extends ModelEngine{
+public class RedisEngine extends ModelEngine{
     private int expire_sec;
 
-    public AbstractRedisEngine(Class model_class, int expire_sec){
+    public RedisEngine(Class model_class, int expire_sec){
         super(model_class);
         this.expire_sec = expire_sec;
     }
@@ -87,7 +88,11 @@ public abstract class AbstractRedisEngine extends ModelEngine{
         RedisClient.getResource().del(store_key);
     }
 
-    public abstract String serialize(Model model) throws ActiveRecordException;
+    public String serialize(Model model) throws ActiveRecordException{
+        return JSON.toJSONString(model.demodelize());
+    }
 
-    public abstract Map<String, Object> deserialize(String store_data) throws ActiveRecordException;
+    public Map<String, Object> deserialize(String store_data) throws ActiveRecordException{
+        return JSON.parseObject(store_data, Map.class);
+    }
 }
