@@ -22,17 +22,14 @@ public class ModelMeta {
     public IdField[] idFields;
     public ColumnField[] columnFields;
 
-<<<<<<< HEAD
     public Set<String> idFieldsSet;
     public Set<String> columnSet;
 
-    // TODO 需要加缓存
-=======
     static {
         metaCache=new HashMap<Class<?>,ModelMeta>();
     }
 
->>>>>>> 开始redis engine
+
     public static ModelMeta getModelMeta(Class<?> clasz) {
         if(metaCache.containsKey(clasz)){
             return metaCache.get(clasz);
@@ -46,37 +43,6 @@ public class ModelMeta {
                 modelMeta.autoCreatable = t.autoCreatable();
             }
 
-<<<<<<< HEAD
-        List<ColumnField> columnFields = new ArrayList<ColumnField>();
-        List<IdField> idFields = new ArrayList<IdField>();
-        modelMeta.idFieldsSet = new HashSet<String>();
-        modelMeta.columnSet = new HashSet<String>();
-
-        for (Field f : clasz.getDeclaredFields()) {
-            Id id = f.getAnnotation(Id.class);
-            if (id != null) {
-                IdField field = new IdField();
-                field.setName(f.getName());
-                field.setType(f.getType());
-                field.setField(f);
-                idFields.add(field);
-                modelMeta.idFieldsSet.add(f.getName());
-            }
-            Column column = f.getAnnotation(Column.class);
-            if (column != null) {
-                ColumnField field = new ColumnField();
-                field.setName(f.getName());
-                field.setType(f.getType());
-                field.setField(f);
-                field.setDefault_value(column.default_value());
-                if(modelMeta.idFieldsSet.contains(f.getName())){
-                    field.setIdField(true);
-                }else{
-                    field.setIdField(false);
-                }
-                columnFields.add(field);
-                modelMeta.columnSet.add(f.getName());
-=======
             List<ColumnField> columnFields = new ArrayList<ColumnField>();
             List<IdField> idFields = new ArrayList<IdField>();
             HashSet<String> idFieldsSet = new HashSet<String>();
@@ -90,6 +56,7 @@ public class ModelMeta {
                     field.setField(f);
                     idFields.add(field);
                     idFieldsSet.add(f.getName());
+                    modelMeta.idFieldsSet.add(f.getName());
                 }
                 Column column = f.getAnnotation(Column.class);
                 if (column != null) {
@@ -104,8 +71,8 @@ public class ModelMeta {
                         field.setIdField(false);
                     }
                     columnFields.add(field);
+                    modelMeta.columnSet.add(f.getName());
                 }
->>>>>>> 开始redis engine
             }
             modelMeta.columnFields = columnFields.toArray(new ColumnField[columnFields.size()]);
             modelMeta.idFields = idFields.toArray(new IdField[idFields.size()]);
