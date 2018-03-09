@@ -1,21 +1,69 @@
 package com.chineseall.orm.storage;
 
+import com.chineseall.orm.ModelMeta;
 import com.chineseall.orm.exception.ActiveRecordException;
 
+import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by wangqiang on 2018/3/5.
  */
-public interface ModelEngine {
+public abstract class ModelEngine {
+    protected Class model_class;
 
-    public Class getModelClass();
+    public ModelEngine(Class model_class) {
+        this.model_class = model_class;
+    }
 
-    public Object fetch(Object[] key, boolean auto_create) throws ActiveRecordException ;
+    public Class getModelClass() {
+        return model_class;
+    }
 
-    public List<Object> fetchMulti(List<Object[]> keys) throws ActiveRecordException ;
+    public Object model_class_create(Object[] key, Object result_data) throws ActiveRecordException {
 
-    public void save() throws ActiveRecordException ;
+        return this.model_class_invoke_method(null, "create", new Class[]{Class.class, Object[].class, HashMap.class}, new Object[]{this.model_class, key, result_data});
+    }
 
-    public void delete() throws ActiveRecordException ;
+    public String model_class_gen_general_key(Object[] tuple_key) throws ActiveRecordException {
+        return (String) this.model_class_invoke_method(null, "gen_general_key", new Class[]{Object[].class}, new Object[]{tuple_key});
+    }
+
+    public Object model_class_invoke_method(Object object, String methodName, Class[] paras, Object[] para_values) throws ActiveRecordException {
+        Object result = null;
+        try {
+            Method method = this.model_class.getMethod(methodName, paras);
+            result = method.invoke(object, para_values);
+        } catch (Exception ex) {
+            throw new ActiveRecordException("model_class_invoke_method " + methodName + " error :" + ex.getMessage());
+        }
+        return result;
+    }
+
+    protected Object[] getKeyValue(Map<String,Object> data_dict){
+        ModelMeta meta = ModelMeta.getModelMeta(this.model_class);
+        Object[] key_values = new String[meta.idFields.length];
+        for (int i=0;i<meta.idFields.length;i++){
+            key_values[i] = data_dict.get(meta.idFields[i].getName());
+        }
+        return key_values;
+    }
+
+
+    protected Object[] arrayChain(Object[] array1,Object[] array2){
+        Object[] array_new = new String[array1.length + array2.length];
+        System.arraycopy(array1, 0, array_new, 0, array1.length);
+        System.arraycopy(array2, 0, array_new, array1.length, array2.length);
+        return array_new;
+    }
+
+    public abstract Object fetch(Object[] key, boolean auto_create) throws ActiveRecordException;
+
+    public abstract List<Object> fetchMulti(List<Object[]> keys) throws ActiveRecordException;
+
+    public abstract void save(Object instance) throws ActiveRecordException;
+
+    public abstract void delete(Object[] key_values) throws ActiveRecordException;
 }

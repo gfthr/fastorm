@@ -14,8 +14,6 @@ import java.util.*;
 
 
 public class Model {
-    private static final String REAL_CACHE_LOCAL_PREFIX = "";
-
     private boolean modified = true;
     private boolean model_saved = false;
     private boolean isproxy = false;
@@ -90,10 +88,10 @@ public class Model {
         return gen_general_key(this.tuple_key()) ;
     }
 
-    protected static String gen_general_key( Object[] tuple_key){
+    public static String gen_general_key( Object[] tuple_key){
         //生成 general key，子类可以按需覆盖此方法
         String key_str = StringUtils.arrayToDelimitedString(tuple_key,"|");
-        return String.format("%s%s|%s",REAL_CACHE_LOCAL_PREFIX, model_engine.getModelClass(),key_str);
+        return String.format("%s%s|%s",Setting.REAL_CACHE_LOCAL_PREFIX, model_engine.getModelClass(),key_str);
     }
 
     public static <E> E create(Class<E> clasz, Object[] key, Map<?, ?> iniValue) throws ActiveRecordException {

@@ -12,6 +12,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 public class ModelMeta {
+    private static Map<Class<?>,ModelMeta> metaCache;
     public String table;
     //    String id;
     public GeneratorType idGeneratorType;
@@ -21,20 +22,31 @@ public class ModelMeta {
     public IdField[] idFields;
     public ColumnField[] columnFields;
 
+<<<<<<< HEAD
     public Set<String> idFieldsSet;
     public Set<String> columnSet;
 
     // TODO 需要加缓存
+=======
+    static {
+        metaCache=new HashMap<Class<?>,ModelMeta>();
+    }
+
+>>>>>>> 开始redis engine
     public static ModelMeta getModelMeta(Class<?> clasz) {
-        ModelMeta modelMeta = new ModelMeta();
+        if(metaCache.containsKey(clasz)){
+            return metaCache.get(clasz);
+        }else{
+            ModelMeta modelMeta = new ModelMeta();
 
-        Table t = clasz.getAnnotation(Table.class);
-        if (t != null) {
-            modelMeta.table = t.name();
-            modelMeta.idGeneratorType = t.generate();
-            modelMeta.autoCreatable = t.autoCreatable();
-        }
+            Table t = clasz.getAnnotation(Table.class);
+            if (t != null) {
+                modelMeta.table = t.name();
+                modelMeta.idGeneratorType = t.generate();
+                modelMeta.autoCreatable = t.autoCreatable();
+            }
 
+<<<<<<< HEAD
         List<ColumnField> columnFields = new ArrayList<ColumnField>();
         List<IdField> idFields = new ArrayList<IdField>();
         modelMeta.idFieldsSet = new HashSet<String>();
@@ -64,14 +76,45 @@ public class ModelMeta {
                 }
                 columnFields.add(field);
                 modelMeta.columnSet.add(f.getName());
+=======
+            List<ColumnField> columnFields = new ArrayList<ColumnField>();
+            List<IdField> idFields = new ArrayList<IdField>();
+            HashSet<String> idFieldsSet = new HashSet<String>();
+
+            for (Field f : clasz.getDeclaredFields()) {
+                Id id = f.getAnnotation(Id.class);
+                if (id != null) {
+                    IdField field = new IdField();
+                    field.setName(f.getName());
+                    field.setType(f.getType());
+                    field.setField(f);
+                    idFields.add(field);
+                    idFieldsSet.add(f.getName());
+                }
+                Column column = f.getAnnotation(Column.class);
+                if (column != null) {
+                    ColumnField field = new ColumnField();
+                    field.setName(f.getName());
+                    field.setType(f.getType());
+                    field.setField(f);
+                    field.setDefault_value(column.default_value());
+                    if(idFieldsSet.contains(f.getName())){
+                        field.setIdField(true);
+                    }else{
+                        field.setIdField(false);
+                    }
+                    columnFields.add(field);
+                }
+>>>>>>> 开始redis engine
             }
+            modelMeta.columnFields = columnFields.toArray(new ColumnField[columnFields.size()]);
+            modelMeta.idFields = idFields.toArray(new IdField[idFields.size()]);
+            if (idFields.size() > 1) {
+                modelMeta.idGeneratorType = GeneratorType.NONE;
+            }
+            metaCache.put(clasz, modelMeta);
+            return modelMeta;
         }
-        modelMeta.columnFields = columnFields.toArray(new ColumnField[columnFields.size()]);
-        modelMeta.idFields = idFields.toArray(new IdField[idFields.size()]);
-        if (idFields.size() > 1) {
-            modelMeta.idGeneratorType = GeneratorType.NONE;
-        }
-        return modelMeta;
     }
 
     public static Object getFieldValue(Class<?> clasz, String field, Object obj) throws FieldAccessException {

@@ -1,7 +1,7 @@
 package com.chineseall.orm.storage;
 
 import com.chineseall.orm.exception.ActiveRecordException;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import com.chineseall.orm.exception.OrmNotImplementedException;
 
 import java.util.List;
 
@@ -9,19 +9,19 @@ import java.util.List;
  * Created by wangqiang on 2018/3/5.
  */
 public class SsdbObjectEngine extends AbstractSsdbEngine{
-    public <E> E fetch(List<?> key, boolean auto_create) throws ActiveRecordException {
-        throw new NotImplementedException();
+    public Object fetch(Object[] key, boolean auto_create) throws ActiveRecordException {
+        throw new OrmNotImplementedException();
     }
 
-    public <E> List<E> fetchMulti(List<?> keys) throws ActiveRecordException {
-        throw new NotImplementedException();
+    public List<Object> fetchMulti(List<java.lang.Object[]> keys) throws ActiveRecordException {
+        throw new OrmNotImplementedException();
     }
 
-    public <E> void save() throws ActiveRecordException {
-        throw new NotImplementedException();
+    public void save(Object instance) throws ActiveRecordException {
+        throw new OrmNotImplementedException();
     }
 
-    public <E> void delete() throws ActiveRecordException {
-        throw new NotImplementedException();
+    public void delete(Object[] key_values) throws ActiveRecordException {
+        throw new OrmNotImplementedException();
     }
 }

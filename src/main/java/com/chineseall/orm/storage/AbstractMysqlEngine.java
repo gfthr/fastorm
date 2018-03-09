@@ -7,9 +7,7 @@ import com.chineseall.orm.ModelMeta;
 import com.chineseall.orm.exception.ActiveRecordException;
 import org.springframework.util.StringUtils;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,25 +15,22 @@ import java.util.Map;
  * Created by wangqiang on 2018/3/5.
  * 提供基本的 SQL 生成和数据库操作。
  */
-public abstract class AbstractMysqlEngine implements ModelEngine{
+public abstract class AbstractMysqlEngine extends ModelEngine{
     DaoSupport dao = new DaoSupport(null);
     protected String table;
     protected String view;
     protected String delete_mark;
-    protected Class model_class;
+
 
     public AbstractMysqlEngine(Class model_class, String table, String delete_mark, String view){
-        if((!StringUtils.isEmpty(table) ||!StringUtils.isEmpty(table)) && !StringUtils.isEmpty(view)){
-            //TODO
+        super(model_class);
+        if((!StringUtils.isEmpty(table) ||!StringUtils.isEmpty(delete_mark)) && !StringUtils.isEmpty(view)){
             new ActiveRecordException("both (table or delete_mark) and view are set").printStackTrace();
         }
         this.table = table;
         this.delete_mark = delete_mark;
         this.view = view;
-        this.model_class = model_class;
     }
-
-
 
     protected String _sql_table(){
         return "`"+this.table+"`";
@@ -59,22 +54,7 @@ public abstract class AbstractMysqlEngine implements ModelEngine{
         return _column_names;
     }
 
-    protected Object[] getKeyValue(Map<String,Object> data_dict){
-        ModelMeta meta = ModelMeta.getModelMeta(this.model_class);
-        Object[] key_values = new String[meta.idFields.length];
-        for (int i=0;i<meta.idFields.length;i++){
-            key_values[i] = data_dict.get(meta.idFields[i].getName());
-        }
-        return key_values;
-    }
 
-
-    protected Object[] arrayChain(Object[] array1,Object[] array2){
-        Object[] array_new = new String[array1.length + array2.length];
-        System.arraycopy(array1, 0, array_new, 0, array1.length);
-        System.arraycopy(array2, 0, array_new, array1.length, array2.length);
-        return array_new;
-    }
 
     protected String _sql_condition(){
         ModelMeta meta = ModelMeta.getModelMeta(this.model_class);
@@ -175,16 +155,7 @@ public abstract class AbstractMysqlEngine implements ModelEngine{
 
     }
 
-    public Object model_class_create(Object[] key, Object result_data)throws ActiveRecordException{
-        Object result = null;
-        try {
-            Method createMethod = this.model_class.getMethod("create", new Class[]{Class.class, Object[].class, HashMap.class});
-            result = createMethod.invoke(null, new Object[]{this.model_class, key, result_data});
-        }catch (Exception ex){
-            throw new ActiveRecordException("fetch error :"+ex.getMessage());
-        }
-        return result;
-    }
+
 
     public Object fetch(Object[] key, boolean auto_create) throws ActiveRecordException {
         Object result= null;
@@ -266,10 +237,10 @@ public abstract class AbstractMysqlEngine implements ModelEngine{
         return StringUtils.arrayToDelimitedString(sql_selects, " UNION ALL ");
     }
 
-    protected List<Map<String,Object>> _fetch_rows_(Object[][] tuple_keys) throws ActiveRecordException {
+    protected List<Map<String,Object>> _fetch_rows_(List<Object[]> tuple_keys) throws ActiveRecordException {
 
         List<Map<String,Object>> rows = new ArrayList<Map<String,Object>>();
-        int count = tuple_keys.length;
+        int count = tuple_keys.size();
         if (count==0){
             return rows;
         }
@@ -277,7 +248,8 @@ public abstract class AbstractMysqlEngine implements ModelEngine{
         if(!StringUtils.isEmpty(this.view)){
             //对于视图形式的查询，无法一次性从数据库查出，使用循环来替代
             String sql = this.view;
-            for (Object[] tuple_key :tuple_keys){
+            for (Object key :tuple_keys){
+                Object[] tuple_key=(Object[])key;
                 List<Map<String,Object>> _rows = null;
                 _rows = dao.select(this._sql_select(), tuple_key,0,0);
                 if(_rows.size()>1){
@@ -290,9 +262,9 @@ public abstract class AbstractMysqlEngine implements ModelEngine{
         String[] key_columns = _key_column_names();
 
         if ((key_columns.length) == 1){
-            Object[] sql_params =new Object[tuple_keys.length];
-            for (int i=0;i<tuple_keys.length;i++) {
-                sql_params[i] = tuple_keys[i][0];
+            Object[] sql_params =new Object[tuple_keys.size()];
+            for (int i=0;i<tuple_keys.size();i++) {
+                sql_params[i] = tuple_keys.get(i)[0];
             }
 
             String[] sql_in_array = new String[count];
@@ -304,9 +276,9 @@ public abstract class AbstractMysqlEngine implements ModelEngine{
             rows = dao.select(sql, sql_params,0,0);
         }else{
             Object[] sql_params = new Object[count*key_columns.length];
-            for (int i=0;i<tuple_keys.length;i++) {
+            for (int i=0;i<tuple_keys.size();i++) {
                 for (int j = 0; j < key_columns.length; j++) {
-                    sql_params[i+j] = tuple_keys[i][j];
+                    sql_params[i+j] = tuple_keys.get(i)[j];
                 }
             }
             String sql = this._gen_sql_multi_select_by_union(count);

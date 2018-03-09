@@ -3,7 +3,6 @@ package com.chineseall.orm.storage;
 import com.alibaba.fastjson.JSON;
 import com.chineseall.orm.Model;
 import com.chineseall.orm.exception.ActiveRecordException;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,23 +21,7 @@ public class MysqlObjectEngine extends AbstractMysqlEngine{
         return this.model_class;
     }
 
-    public Object fetch(Object[] key, boolean auto_create) throws ActiveRecordException {
-        throw new NotImplementedException();
-    }
-
-    public List<Object> fetchMulti(List<java.lang.Object[]> keys) throws ActiveRecordException {
-        throw new NotImplementedException();
-    }
-
-    public void save() throws ActiveRecordException {
-        throw new NotImplementedException();
-    }
-
-    public void delete() throws ActiveRecordException {
-        throw new NotImplementedException();
-    }
-
-    public List<Object> fetchMulti(Object[][] keys) throws ActiveRecordException{
+    public List<Object> fetchMulti(List<Object[]> keys) throws ActiveRecordException{
         List<Map<String,Object>> data_dicts = this._fetch_rows_(keys);
         List<Object> instances =new ArrayList<Object>();
         for (Map<String,Object> data_dict:
