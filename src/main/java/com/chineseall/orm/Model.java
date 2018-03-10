@@ -13,7 +13,7 @@ import java.util.*;
  */
 
 
-public class Model {
+public abstract class Model {
     private boolean modified = true;
     private boolean model_saved = false;
     private boolean isproxy = false;
@@ -42,27 +42,6 @@ public class Model {
 
     public Set<String> getModified_attrs() {
         return modified_attrs;
-    }
-
-    public Map<String,Object> demodelize(){
-        ModelMeta meta = ModelMeta.getModelMeta(model_engine.getModelClass());
-        return this.dump(meta.get_column_names());
-    }
-
-    public Map<String,Object> dump(String[] attrs){
-        //指定属性导出成原始类型或 dict、list。
-        Map<String,Object> result_dict = new HashMap<String,Object>();
-        try {
-            ModelMeta meta = ModelMeta.getModelMeta(model_engine.getModelClass());
-            for (String attr:
-                    attrs) {
-                result_dict.put(attr,meta.getFieldValue(model_engine.getModelClass(),attr,this));
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-            //("meta.getFieldValue error:"+e.getMessage());
-        }
-        return result_dict;
     }
 
     /**
@@ -99,16 +78,34 @@ public class Model {
         return String.format("%s%s|%s",Setting.REAL_CACHE_LOCAL_PREFIX, model_engine.getModelClass(),key_str);
     }
 
-    public static <E> E create(Class<E> clasz, Object[] key, Map<?, ?> iniValue) throws ActiveRecordException {
+    public static <E> E fetch(Class<E> clasz, Object[] key, boolean auto_create) throws ActiveRecordException {
+        // TODO: 2018/3/2
+        return null;
+    }
+
+    public static <E> List<E> fetchMulti(Class<E> clasz, Object[] keys) throws ActiveRecordException {
+        // TODO: 2018/3/2
+        return null;
+    }
+
+    public void save() throws ActiveRecordException {
+//        model_engine.save();
+    }
+
+    public void delete() throws ActiveRecordException {
+
+    }
+
+    public static <E> E create(Object[] key, Map<?, ?> iniValue) throws ActiveRecordException {
 
         // 1)创建代理类,解决属性变化的监听问题
         ModelProxy proxy = new ModelProxy();
-        E obj = proxy.getProxyObject(clasz);
+        E obj = (E)proxy.getProxyObject(model_engine.getModelClass());
         if (obj instanceof Model) {
             ModelMeta.setFieldValue(Model.class, "isproxy", obj, true);
             ModelMeta.setFieldValue(Model.class, "model_saved", obj, false);
         }
-        ModelMeta meta = ModelMeta.getModelMeta(clasz);
+        ModelMeta meta = ModelMeta.getModelMeta(model_engine.getModelClass());
 
         // 2)将key赋值
         if (key != null && key.length >= 1) {
@@ -149,22 +146,23 @@ public class Model {
         return obj;
     }
 
-    public static <E> E fetch(Class<E> clasz, Object[] key, boolean auto_create) throws ActiveRecordException {
-        // TODO: 2018/3/2
-        return null;
-    }
+    public abstract Map<String,Object> demodelize();
 
-    public static <E> List<E> fetchMulti(Class<E> clasz, Object[] keys) throws ActiveRecordException {
-        // TODO: 2018/3/2
-        return null;
-    }
 
-    public void save() throws ActiveRecordException {
-//        model_engine.save();
-    }
-
-    public void delete() throws ActiveRecordException {
-
+    public Map<String,Object> dump(String[] attrs){
+        //指定属性导出成原始类型或 dict、list。
+        Map<String,Object> result_dict = new HashMap<String,Object>();
+        try {
+            ModelMeta meta = ModelMeta.getModelMeta(model_engine.getModelClass());
+            for (String attr:
+                    attrs) {
+                result_dict.put(attr,meta.getFieldValue(model_engine.getModelClass(),attr,this));
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            //("meta.getFieldValue error:"+e.getMessage());
+        }
+        return result_dict;
     }
 
 }

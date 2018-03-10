@@ -4,6 +4,8 @@ import com.chineseall.orm.Model;
 import com.chineseall.orm.exception.ActiveRecordException;
 import com.chineseall.orm.exception.OrmNotImplementedException;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,48 +13,49 @@ import java.util.Map;
  * Created by wangqiang on 2018/3/5.
  */
 public class MysqlValueEngine extends AbstractMysqlEngine{
+    private String column;
 
-    public MysqlValueEngine(Class model_class, String table, String delete_mark, String view){
+    public MysqlValueEngine(Class model_class, String table, String column,String delete_mark, String view){
         super(model_class,table,delete_mark,view);
+        this.column = column;
     }
 
-    public Object fetch(Object[] key, boolean auto_create) throws ActiveRecordException {
-        throw new OrmNotImplementedException();
-    }
-
-    public List<Object> fetchMulti(List<java.lang.Object[]> keys) throws ActiveRecordException {
-        throw new OrmNotImplementedException();
-    }
-
-    public void save(Object instance) throws ActiveRecordException {
-        throw new OrmNotImplementedException();
-    }
-
-    public void delete(Object[] key_values) throws ActiveRecordException {
-        throw new OrmNotImplementedException();
+    public List<Object> fetchMulti(List<Object[]> keys) throws ActiveRecordException{
+        List<Map<String,Object>> data_dicts = this._fetch_rows_(keys);
+        List<Object> instances =new ArrayList<Object>();
+        for (Map<String,Object> data_dict:
+                data_dicts) {
+            if(data_dict!=null){
+                Map<String,Object> iniVal=new HashMap<String,Object>();
+                iniVal.put(this.column,data_dict.get(this.column));
+                Object instance=this.model_class_create(this.getKeyValue(data_dict),iniVal);
+                instances.add(instance);
+            }
+        }
+        return instances;
     }
 
     @Override
     protected String[] _get_column_names_for_select_(){
-        throw new OrmNotImplementedException();
+        return new String[]{this.column};
     }
 
     protected Object[] _get_columns_for_update_(Model model){
-        throw new OrmNotImplementedException();
+        String[] attr_names =new String[]{this.column};
+        Object[] attr_values = this.__dump_values(model, attr_names);
+        return new Object[]{attr_names,attr_values};
     }
 
     protected String[] _get_column_names_for_insert_(){
-        throw new OrmNotImplementedException();
+        return new String[]{this.column};
     }
 
     protected Object[] _get_column_values_for_insert_(Model model){
-        throw new OrmNotImplementedException();
+        String[] attr_names = this._get_column_names_for_insert_();
+        return this.__dump_values(model, attr_names);
     }
 
     protected Object _row_to_value_( Map<String,Object> row_dict){
-        throw new OrmNotImplementedException();
-    }
-
-    public static Object[] __dump_values(Model model, String[] attr_names){throw new OrmNotImplementedException();
+        return row_dict;
     }
 }

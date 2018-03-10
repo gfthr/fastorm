@@ -3,13 +3,14 @@ package com.chineseall.orm.storage;
 import com.alibaba.fastjson.JSON;
 import com.chineseall.orm.Model;
 import com.chineseall.orm.RedisClient;
+import com.chineseall.orm.Setting;
 import com.chineseall.orm.exception.ActiveRecordException;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Random;
 /**
  * Created by wangqiang on 2018/3/5.
  */
@@ -18,8 +19,21 @@ public class RedisEngine extends ModelEngine{
 
     public RedisEngine(Class model_class, int expire_sec){
         super(model_class);
-        this.expire_sec = expire_sec;
+        this.expire_sec = _redis_expire_sec(expire_sec);
     }
+
+    private int _redis_expire_sec(int expire_sec){
+        if(expire_sec==0){
+            Random r = new Random();
+            int sec = (int) Math.floor(Setting.redis_model_expired_seconds*(1+r.nextFloat()));
+            return sec;
+        }else if(expire_sec == -1){
+            return expire_sec;
+        }else{
+            return expire_sec;
+        }
+    }
+
 
     public Object fetch(Object[] key, boolean auto_create) throws ActiveRecordException {
         String store_key = model_class_gen_general_key(key);

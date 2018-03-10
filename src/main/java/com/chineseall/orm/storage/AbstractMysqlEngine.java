@@ -1,5 +1,6 @@
 package com.chineseall.orm.storage;
 
+import com.alibaba.fastjson.JSON;
 import com.chineseall.orm.ConvertUtil;
 import com.chineseall.orm.DaoSupport;
 import com.chineseall.orm.Model;
@@ -351,6 +352,24 @@ public abstract class AbstractMysqlEngine extends ModelEngine{
             throw new ActiveRecordException("delete error:"+ ex.getMessage());
         }
 
+    }
+
+    public static Object[] __dump_values(Model model, String[] attr_names){
+        //按 attr_names 的顺序 dump 出 instance 的属性，并把 dict，list 转成字符串
+        Map<String,Object> result_dict = model.dump(attr_names);
+
+        Object[] result_list = new Object[attr_names.length];
+
+        Object value=null;
+        for (int i = 0; i < attr_names.length; i++) {
+            String attr_name = attr_names[i];
+            value = result_dict.get(attr_name);
+            if(value instanceof Map || value instanceof List){
+                value = JSON.toJSONString(value);
+            }
+            result_list[i]=value;
+        }
+        return result_list;
     }
 
     protected abstract String[] _get_column_names_for_select_();

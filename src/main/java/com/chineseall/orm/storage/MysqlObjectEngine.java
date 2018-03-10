@@ -17,9 +17,9 @@ public class MysqlObjectEngine extends AbstractMysqlEngine{
         super(model_class,table,delete_mark,view);
     }
 
-    public Class getModelClass(){
-        return this.model_class;
-    }
+//    public Class getModelClass(){
+//        return this.model_class;
+//    }
 
     public List<Object> fetchMulti(List<Object[]> keys) throws ActiveRecordException{
         List<Map<String,Object>> data_dicts = this._fetch_rows_(keys);
@@ -62,23 +62,7 @@ public class MysqlObjectEngine extends AbstractMysqlEngine{
         return row_dict;
     }
 
-    public static Object[] __dump_values(Model model, String[] attr_names){
-        //按 attr_names 的顺序 dump 出 instance 的属性，并把 dict，list 转成字符串
-        Map<String,Object> result_dict = model.dump(attr_names);
 
-        Object[] result_list = new Object[attr_names.length];
-
-        Object value=null;
-        for (int i = 0; i < attr_names.length; i++) {
-            String attr_name = attr_names[i];
-            value = result_dict.get(attr_name);
-            if(value instanceof Map || value instanceof List){
-                value = JSON.toJSONString(value);
-            }
-            result_list[i]=value;
-        }
-        return result_list;
-    }
 
 
 }

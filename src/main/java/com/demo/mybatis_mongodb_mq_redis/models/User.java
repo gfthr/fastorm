@@ -1,6 +1,7 @@
 package com.demo.mybatis_mongodb_mq_redis.models;
 
 import com.chineseall.orm.Model;
+import com.chineseall.orm.ModelObject;
 import com.chineseall.orm.annotations.Column;
 import com.chineseall.orm.annotations.GeneratorType;
 import com.chineseall.orm.annotations.Id;
@@ -13,7 +14,7 @@ import com.chineseall.orm.storage.MysqlObjectEngine;
 
 
 @Table(name = "users", generate = GeneratorType.AUTO)
-public class User extends Model {
+public class User extends ModelObject {
     static {
         model_engine = new MysqlObjectEngine(User.class, "users",null,null);
     }

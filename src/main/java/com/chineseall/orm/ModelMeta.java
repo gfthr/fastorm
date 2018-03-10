@@ -38,8 +38,11 @@ public class ModelMeta {
     }
 
     public String[] get_column_names(){
+        //不包括 Key 的字段
         String[] _column_names = new String[this.columnFields.length];
         for (int i=0;i<this.columnFields.length;i++){
+            if(this.idFieldsSet.contains(this.columnFields[i].getName()))
+                continue;
             _column_names[i] = this.columnFields[i].getName();
         }
         return _column_names;
