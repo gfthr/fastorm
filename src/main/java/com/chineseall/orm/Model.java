@@ -13,7 +13,7 @@ import java.util.*;
  */
 
 
-public abstract class Model<E> {
+public abstract class Model<T> {
     private boolean modified = true;
     private boolean model_saved = false;
     private boolean isproxy = false;
@@ -78,7 +78,7 @@ public abstract class Model<E> {
         return String.format("%s%s|%s",Setting.REAL_CACHE_LOCAL_PREFIX, model_engine.getModelClass(),key_str);
     }
 
-    public static <E> E fetch(Object[] key, boolean auto_create) throws ActiveRecordException {
+    public static<T> T fetch(Object[] key, boolean auto_create) throws ActiveRecordException {
         /*
         根据 key 获取对象，如果 key 为 None 或者 (None,)，返回 None。
         :param auto_create:
@@ -97,7 +97,7 @@ public abstract class Model<E> {
             throw new ActiveRecordException(model_engine.getModelClass().getName()+"  is not auto_creatable");
         }
 
-        E instance = (E)model_engine.fetch(key, auto_create);
+        T instance = (T)model_engine.fetch(key, auto_create);
 
         if(instance!=null && instance instanceof Model){
             ((Model)instance).markFlushed();
@@ -106,7 +106,7 @@ public abstract class Model<E> {
         return instance;
     }
 
-    public static <E> List<E> fetchMulti(List<Object[]> keys) throws ActiveRecordException {
+    public static <T> List<T> fetchMulti(List<Object[]> keys) throws ActiveRecordException {
         /*
         一次性获取多个对象。
         根据 keys 的顺序返回获取的对象，对象获取不到时为 None。
@@ -114,12 +114,12 @@ public abstract class Model<E> {
         :return: list[instance]
         :rtype: list[Model]
         */
-        List<E> instances=new ArrayList<E>();
+        List<T> instances=new ArrayList<T>();
         if(keys==null || (keys!=null && keys.size()<=0)) {
             return instances;
         }
-        instances = (List<E>)model_engine.fetchMulti(keys);
-        for (E instance:
+        instances = (List<T>)model_engine.fetchMulti(keys);
+        for (T instance:
             instances) {
             if(instance!=null){
                 ((Model)instance).markFlushed();
@@ -143,11 +143,11 @@ public abstract class Model<E> {
         model_engine.delete(this.tuple_key());
     }
 
-    public static <E> E create(Object[] key, Map<?, ?> iniValue) throws ActiveRecordException {
+    public static <T> T create(Object[] key, Map<?, ?> iniValue) throws ActiveRecordException {
 
         // 1)创建代理类,解决属性变化的监听问题
         ModelProxy proxy = new ModelProxy();
-        E obj = (E)proxy.getProxyObject(model_engine.getModelClass());
+        T obj = (T)proxy.getProxyObject(model_engine.getModelClass());
         if (obj instanceof Model) {
             ModelMeta.setFieldValue(Model.class, "isproxy", obj, true);
             ModelMeta.setFieldValue(Model.class, "model_saved", obj, false);

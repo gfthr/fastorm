@@ -26,7 +26,7 @@ public class ModelScanner {
         Set<Class<?>> classesList = reflections.getTypesAnnotatedWith(Table.class);
         try {
             // 存放url和ExecutorBean的对应关系
-            for (Class classz : classesList) {
+            for (Class<?> classz : classesList) {
                 //得到该类下面的所有方法
                 Table t = (Table)classz.getAnnotation(Table.class);
                 Object engineObj= getEngine(t.engine(),classz,t.name(),t.deleteMark(),t.view(),t.column());
@@ -40,17 +40,17 @@ public class ModelScanner {
         }
     }
 
-    public static Object getEngine(ModelEngineType type, Class modelClass, String table,String deleteMark, String view,String column){
+    public static<E> Object getEngine(ModelEngineType type, Class<E> modelClass, String table,String deleteMark, String view,String column){
         if(type==ModelEngineType.CACHE_MYSQL_OBJECT){
             return CacheEngine.getMysqlObjectCacheEngine(modelClass, table,  deleteMark,  view,null,null);
         }else if (type==ModelEngineType.CACHE_MYSQL_VALUE){
             return CacheEngine.getMysqlValueCacheEngine(modelClass, table,column,  deleteMark,  view,null,null);
         }else if (type==ModelEngineType.MYSQL_OBJECT){
-            return new MysqlObjectEngine(modelClass, table,deleteMark,  view);
+            return new MysqlObjectEngine<E>(modelClass, table,deleteMark,  view);
         }else if (type==ModelEngineType.MYSQL_VALUE){
-            return new MysqlValueEngine(modelClass, table,column,deleteMark,  view);
+            return new MysqlValueEngine<E>(modelClass, table,column,deleteMark,  view);
         }else if (type==ModelEngineType.REDIS){
-            return new RedisEngine(modelClass, 0);
+            return new RedisEngine<E>(modelClass, 0);
         }else{
             return null;
         }

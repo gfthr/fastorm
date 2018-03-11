@@ -16,14 +16,14 @@ import java.util.Map;
  * Created by wangqiang on 2018/3/5.
  * 提供基本的 SQL 生成和数据库操作。
  */
-public abstract class AbstractMysqlEngine extends ModelEngine{
+public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
     DaoSupport dao = new DaoSupport(null);
     protected String table;
     protected String view;
     protected String delete_mark;
 
 
-    public AbstractMysqlEngine(Class model_class, String table, String delete_mark, String view){
+    public AbstractMysqlEngine(Class<T> model_class, String table, String delete_mark, String view){
         super(model_class);
         if((!StringUtils.isEmpty(table) ||!StringUtils.isEmpty(delete_mark)) && !StringUtils.isEmpty(view)){
             new ActiveRecordException("both (table or delete_mark) and view are set").printStackTrace();
@@ -148,7 +148,7 @@ public abstract class AbstractMysqlEngine extends ModelEngine{
 
 
 
-    public Object fetch(Object[] key, boolean auto_create) throws ActiveRecordException {
+    public T fetch(Object[] key, boolean auto_create) throws ActiveRecordException {
         Object result= null;
         try {
             Map<String,Object> result_row = this._fetch_row_(key);
@@ -157,7 +157,7 @@ public abstract class AbstractMysqlEngine extends ModelEngine{
                 result_data = this._row_to_value_(result_row);
             }
             if (result_data!=null) {
-                return model_class_create(key, result_data);
+                return (T)model_class_create(key, result_data);
             }
 
             if (!auto_create)
@@ -165,7 +165,7 @@ public abstract class AbstractMysqlEngine extends ModelEngine{
 
             // auto_create
             boolean insert_conflict = false; // mark if successful in save
-            Object instance = model_class_create(key, null);
+            T instance = (T)model_class_create(key, null);
 
             try {
                 this.save(instance);
@@ -186,7 +186,7 @@ public abstract class AbstractMysqlEngine extends ModelEngine{
             if (result_data ==null){
                 throw new ActiveRecordException("None in re-fetch auto_create instance");
             }
-            return model_class_create(key, result_data);
+            return (T)model_class_create(key, result_data);
 
         }catch (Exception ex){
             throw new ActiveRecordException("fetch error :"+ex.getMessage());

@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * Created by wangqiang on 2018/3/10.
  */
-public class ModelObject<E> extends Model<E> {
+public class ModelObject<T> extends Model<T> {
 
     public Map<String,Object> demodelize(){
         ModelMeta meta = ModelMeta.getModelMeta(model_engine.getModelClass());

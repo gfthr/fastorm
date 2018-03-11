@@ -11,9 +11,9 @@ import java.util.Map;
 /**
  * Created by wangqiang on 2018/3/5.
  */
-public class MysqlObjectEngine extends AbstractMysqlEngine{
+public class MysqlObjectEngine<T> extends AbstractMysqlEngine<T>{
 
-    public MysqlObjectEngine(Class model_class, String table, String delete_mark, String view){
+    public MysqlObjectEngine(Class<T> model_class, String table, String delete_mark, String view){
         super(model_class,table,delete_mark,view);
     }
 
@@ -21,13 +21,13 @@ public class MysqlObjectEngine extends AbstractMysqlEngine{
 //        return this.model_class;
 //    }
 
-    public List<Object> fetchMulti(List<Object[]> keys) throws ActiveRecordException{
+    public List<T> fetchMulti(List<Object[]> keys) throws ActiveRecordException{
         List<Map<String,Object>> data_dicts = this._fetch_rows_(keys);
-        List<Object> instances =new ArrayList<Object>();
+        List<T> instances =new ArrayList<T>();
         for (Map<String,Object> data_dict:
                 data_dicts) {
             if(data_dict!=null){
-                Object instance=this.model_class_create(this.getKeyValue(data_dict),data_dict);
+                T instance=(T)this.model_class_create(this.getKeyValue(data_dict),data_dict);
                 instances.add(instance);
             }
         }

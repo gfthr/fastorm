@@ -14,10 +14,10 @@ import java.util.Random;
 /**
  * Created by wangqiang on 2018/3/5.
  */
-public class RedisEngine extends ModelEngine{
+public class RedisEngine<T> extends ModelEngine<T>{
     private int expire_sec;
 
-    public RedisEngine(Class model_class, int expire_sec){
+    public RedisEngine(Class<T> model_class, int expire_sec){
         super(model_class);
         this.expire_sec = _redis_expire_sec(expire_sec);
     }
@@ -35,26 +35,26 @@ public class RedisEngine extends ModelEngine{
     }
 
 
-    public Object fetch(Object[] key, boolean auto_create) throws ActiveRecordException {
+    public T fetch(Object[] key, boolean auto_create) throws ActiveRecordException {
         String store_key = model_class_gen_general_key(key);
         String store_data = RedisClient.getResource().get(store_key);
 
         if (!StringUtils.isEmpty(store_data)) {
             Map<String, Object> data = this.deserialize(store_data);
-            return model_class_create(key, data);
+            return (T)model_class_create(key, data);
         }
 
         if (auto_create) {
-            Object instance = model_class_create(key,null);
+            T instance = (T)model_class_create(key,null);
             this.save(instance);
             return instance;
         }
         return null;
     }
 
-    public List<Object> fetchMulti(List<Object[]> keys) throws ActiveRecordException{
+    public List<T> fetchMulti(List<Object[]> keys) throws ActiveRecordException{
         if(keys==null){
-            return new ArrayList<Object>();
+            return new ArrayList<T>();
         }
         String[] store_keys =new String[keys.size()];
         for (int i = 0; i < keys.size(); i++) {
@@ -62,14 +62,14 @@ public class RedisEngine extends ModelEngine{
         }
         List<String> store_data_list =  RedisClient.getResource().mget(store_keys);
 
-        List<Object> instances=new ArrayList<Object>();
+        List<T> instances=new ArrayList<T>();
         for (String store_data:store_data_list
              ) {
-            Object instance =null;
+            T instance =null;
             if(!StringUtils.isEmpty(store_data)){
                 Map<String, Object> data = this.deserialize(store_data);
                 Object[] tuple_key = getKeyValue(data);
-                instance = model_class_create(tuple_key, data);
+                instance = (T)model_class_create(tuple_key, data);
             }
             instances.add(instance);
         }

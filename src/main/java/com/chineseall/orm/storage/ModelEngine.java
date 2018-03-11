@@ -11,14 +11,14 @@ import java.util.Map;
 /**
  * Created by wangqiang on 2018/3/5.
  */
-public abstract class ModelEngine {
-    protected Class model_class;
+public abstract class ModelEngine<T> {
+    protected Class<T> model_class;
 
-    public ModelEngine(Class model_class) {
+    public ModelEngine(Class<T> model_class) {
         this.model_class = model_class;
     }
 
-    public Class getModelClass() {
+    public Class<T> getModelClass() {
         return model_class;
     }
 
@@ -59,9 +59,9 @@ public abstract class ModelEngine {
         return array_new;
     }
 
-    public abstract Object fetch(Object[] key, boolean auto_create) throws ActiveRecordException;
+    public abstract T fetch(Object[] key, boolean auto_create) throws ActiveRecordException;
 
-    public abstract List<Object> fetchMulti(List<Object[]> keys) throws ActiveRecordException;
+    public abstract List<T> fetchMulti(List<Object[]> keys) throws ActiveRecordException;
 
     public abstract void save(Object instance) throws ActiveRecordException;
 

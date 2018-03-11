@@ -4,55 +4,56 @@ import com.chineseall.orm.Model;
 import com.chineseall.orm.exception.ActiveRecordException;
 import com.chineseall.orm.exception.OrmNotImplementedException;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by wangqiang on 2018/3/5.
  */
-public class CacheEngine extends ModelEngine {
+public class CacheEngine<T> extends ModelEngine<T> {
     private ModelEngine ng_source;
     private ModelEngine ng_cache;
     private Nonemark nonemark;
 
-    public CacheEngine(Class model_class, ModelEngine ng_source, ModelEngine ng_cache, Nonemark nonemark) {
+    public CacheEngine(Class<T> model_class, ModelEngine ng_source, ModelEngine ng_cache, Nonemark nonemark) {
         super(model_class);
         this.ng_source = ng_source;
         this.ng_cache = ng_cache;
         this.nonemark = nonemark;
     }
 
-    public static CacheEngine getMysqlObjectCacheEngine(Class model_class, String table, String delete_mark, String view,
+    public static<E> CacheEngine getMysqlObjectCacheEngine(Class<E> model_class, String table, String delete_mark, String view,
                                                         ModelEngine ng_cache, Nonemark nonemark) {
         if (ng_cache == null) {
-            ng_cache = new RedisEngine(model_class, 0);
+            ng_cache = new RedisEngine<E>(model_class, 0);
         }
         if (nonemark == null) {
             nonemark = new RedisNonemark(0);
         }
-        MysqlObjectEngine ng_source = new MysqlObjectEngine(model_class, table, delete_mark, view);
-        return new CacheEngine(model_class, ng_source, ng_cache, nonemark);
+        MysqlObjectEngine ng_source = new MysqlObjectEngine<E>(model_class, table, delete_mark, view);
+        return new CacheEngine<E>(model_class, ng_source, ng_cache, nonemark);
     }
 
-    public static CacheEngine getMysqlValueCacheEngine(Class model_class, String table, String column, String delete_mark, String view,
+    public static<E> CacheEngine getMysqlValueCacheEngine(Class<E> model_class, String table, String column, String delete_mark, String view,
                                                        ModelEngine ng_cache, Nonemark nonemark) {
         if (ng_cache == null) {
-            ng_cache = new RedisEngine(model_class, 0);
+            ng_cache = new RedisEngine<E>(model_class, 0);
         }
         if (nonemark == null) {
             nonemark = new RedisNonemark(0);
         }
-        MysqlValueEngine ng_source = new MysqlValueEngine(model_class, table, column, delete_mark, view);
-        return new CacheEngine(model_class, ng_source, ng_cache, nonemark);
+        MysqlValueEngine ng_source = new MysqlValueEngine<E>(model_class, table, column, delete_mark, view);
+        return new CacheEngine<E>(model_class, ng_source, ng_cache, nonemark);
     }
 
 
-    public Object fetch(Object[] key, boolean auto_create) throws ActiveRecordException {
+    public T fetch(Object[] key, boolean auto_create) throws ActiveRecordException {
         String general_key = this.model_class_gen_general_key(key);
-        Object instance = null;
+        T instance = null;
         // 先从缓存取。这里暂时不考虑 auto_create，如有需要再改这里的逻辑
         if (ng_cache != null) {
-            instance = ng_cache.fetch(key, false);
+            instance = (T)ng_cache.fetch(key, false);
             if (instance != null)
                 return instance;
         }
@@ -68,7 +69,7 @@ public class CacheEngine extends ModelEngine {
             }
         }
         // 有源，且无 nonemark，从源取
-        instance = ng_source.fetch(key, auto_create);
+        instance =(T)ng_source.fetch(key, auto_create);
 
         if (instance == null) {
             // 不存在，设 nonemark
@@ -84,8 +85,8 @@ public class CacheEngine extends ModelEngine {
     }
 
 
-    public List<Object> fetchMulti(List<Object[]> keys) throws ActiveRecordException {
-        List<Object> instances = new ArrayList<Object>();
+    public List<T> fetchMulti(List<Object[]> keys) throws ActiveRecordException {
+        List<T> instances = new ArrayList<T>();
 
         // 从缓存取
         if (ng_cache != null) {
@@ -122,11 +123,11 @@ public class CacheEngine extends ModelEngine {
         }
 
         // 从源里取剩余的数据
-        List<Object> rest_instances = ng_source.fetchMulti(rest_tuple_keys);
+        List<T> rest_instances = ng_source.fetchMulti(rest_tuple_keys);
         for (int i = 0; i < rest_instances.size(); i++) {
             Object[] tuple_key = rest_tuple_keys.get(i);
             Integer index = rest_indices.get(i);
-            Object instance = rest_instances.get(i);
+            T instance = rest_instances.get(i);
             if (instance != null) {
                 // 没取到，设 nonemark
                 if (nonemark != null) {
