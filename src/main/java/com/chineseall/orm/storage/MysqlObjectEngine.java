@@ -42,7 +42,7 @@ public class MysqlObjectEngine extends AbstractMysqlEngine{
     protected Object[] _get_columns_for_update_(Model model){
         String[] attr_names = new String[model.getModified_attrs().size()];
         for (int i = 0; i < model.getModified_attrs().size(); i++) {
-            attr_names[i]=model.getModified_attrs().iterator().next();
+            attr_names[i]=(String)model.getModified_attrs().iterator().next();
         }
 
         Object[] attr_values = this.__dump_values(model, attr_names);

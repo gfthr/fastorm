@@ -118,7 +118,7 @@ public abstract class Model<E> {
         if(keys==null || (keys!=null && keys.size()<=0)) {
             return instances;
         }
-        instances = model_engine.fetchMulti(keys);
+        instances = (List<E>)model_engine.fetchMulti(keys);
         for (E instance:
             instances) {
             if(instance!=null){

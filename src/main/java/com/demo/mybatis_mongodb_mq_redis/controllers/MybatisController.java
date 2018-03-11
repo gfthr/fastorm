@@ -26,8 +26,7 @@ public class MybatisController {
             iniValue.put("name", "name1");
             iniValue.put("addr", "addr1");
             User user = User.create(new Object[]{1,2}, iniValue);
-
-//            user.save();
+            user.save();
         }catch (Exception ex){
             ex.printStackTrace();
         }
