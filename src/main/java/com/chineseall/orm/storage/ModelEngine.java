@@ -52,12 +52,12 @@ public abstract class ModelEngine<T> {
     }
 
 
-    protected Object[] arrayChain(Object[] array1,Object[] array2){
-        Object[] array_new = new String[array1.length + array2.length];
-        System.arraycopy(array1, 0, array_new, 0, array1.length);
-        System.arraycopy(array2, 0, array_new, array1.length, array2.length);
-        return array_new;
-    }
+//    protected Object[] arrayChain(Object[] array1,Object[] array2){
+//        Object[] array_new = new Object[array1.length + array2.length];
+//        System.arraycopy(array1, 0, array_new, 0, array1.length);
+//        System.arraycopy(array2, 0, array_new, array1.length, array2.length);
+//        return array_new;
+//    }
 
     public abstract T fetch(Object[] key, boolean auto_create) throws ActiveRecordException;
 

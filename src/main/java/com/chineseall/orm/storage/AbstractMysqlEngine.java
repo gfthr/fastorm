@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 /**
  * Created by wangqiang on 2018/3/5.
  * 提供基本的 SQL 生成和数据库操作。
@@ -105,7 +107,7 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
         String[] key_column_names = _key_column_names();
         String[] value_column_names = this._get_column_names_for_insert_();
         // 约定：key 在前，value 在后
-        String[] column_names = (String[])arrayChain(key_column_names, value_column_names);
+        String[] column_names = ArrayUtils.addAll(key_column_names,value_column_names);
         return this._gen_sql_insert(column_names);
     }
 
@@ -198,7 +200,7 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
         // `key-column1`,`key-column2`,`value-column1`,`value-column2`
         String[] key_columns = _key_column_names();
         String[] value_columns = this._get_column_names_for_select_();
-        String[] columns = (String[])arrayChain(key_columns, value_columns);
+        String[] columns =  ArrayUtils.addAll(key_columns, value_columns);
         return this._gen_sql_columns(columns);
     }
 
@@ -314,7 +316,7 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
             // UPDATE `table` SET `column1`=%s,`column2`=%s
             // WHERE `key1`=%s AND`key2`=%s
             String sql_update = String.format(this._sql_update(),str_sql_set);
-            String[] values = (String[]) arrayChain(column_values, tuple_key);
+            Object[] values =  ArrayUtils.addAll(column_values, tuple_key);
             row_count = dao.execute(sql_update,values);
 
         }else{
@@ -334,7 +336,7 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
                 // 有多个 key，或者有指定 key 的值，把 key 和属性直接插入数据库
                 // 注：虽然这里支持多个 key 的插入，但不能用这些 key 作为主键
                 // 表里必须要有额外的主键
-                Object[] values = arrayChain(tuple_key, column_values);
+                Object[] values =  ArrayUtils.addAll(tuple_key, column_values);
                 row_count=  dao.execute(this._sql_insert_with_key(),values);
             }
         }

@@ -25,8 +25,10 @@ public class ModelMeta {
     public Set<String> idFieldsSet;
     public Set<String> columnSet;
 
-    public ModelMeta(){
+    private String[] key_column_names; //key字段名称
+    private String[] column_names;//不包括key字段的字段名称
 
+    public ModelMeta(){
         idFieldsSet = new HashSet<String>();
         columnSet = new HashSet<String>();
     }
@@ -36,24 +38,13 @@ public class ModelMeta {
     }
 
     public String[] get_key_column_names(){
-        String[] key_column_names = new String[this.idFields.length];
-        for (int i=0;i<this.idFields.length;i++){
-            key_column_names[i] = this.idFields[i].getName();
-        }
         return key_column_names;
     }
 
     public String[] get_column_names(){
         //不包括 Key 的字段
-        String[] _column_names = new String[this.columnFields.length];
-        for (int i=0;i<this.columnFields.length;i++){
-            if(this.idFieldsSet.contains(this.columnFields[i].getName()))
-                continue;
-            _column_names[i] = this.columnFields[i].getName();
-        }
-        return _column_names;
+        return column_names;
     }
-
 
     public static ModelMeta getModelMeta(Class<?> clasz) {
         if(metaCache.containsKey(clasz)){
@@ -101,9 +92,26 @@ public class ModelMeta {
             }
             modelMeta.columnFields = columnFields.toArray(new ColumnField[columnFields.size()]);
             modelMeta.idFields = idFields.toArray(new IdField[idFields.size()]);
+
+
+
             if (idFields.size() > 1) {
                 modelMeta.idGeneratorType = GeneratorType.NONE;
             }
+
+            modelMeta.key_column_names = new String[modelMeta.idFields.length];
+            for (int i=0;i<modelMeta.idFields.length;i++){
+                modelMeta.key_column_names[i] = modelMeta.idFields[i].getName();
+            }
+
+            List<String> list_column_names=new ArrayList<String>();
+            for (int i=0;i<modelMeta.columnFields.length;i++){
+                if(modelMeta.idFieldsSet.contains(modelMeta.columnFields[i].getName()))
+                    continue;
+                list_column_names.add(modelMeta.columnFields[i].getName());
+            }
+            modelMeta.column_names = list_column_names.toArray(new String[list_column_names.size()]);
+
             metaCache.put(clasz, modelMeta);
             return modelMeta;
         }
