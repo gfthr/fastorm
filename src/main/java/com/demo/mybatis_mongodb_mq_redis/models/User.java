@@ -14,7 +14,7 @@ import com.chineseall.orm.storage.MysqlObjectEngine;
 
 
 @Table(name = "users", generate = GeneratorType.AUTO)
-public class User extends ModelObject {
+public class User extends ModelObject<User> {
     static {
         model_engine = new MysqlObjectEngine(User.class, "users",null,null);
     }

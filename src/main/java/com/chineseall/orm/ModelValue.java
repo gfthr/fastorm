@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Created by wangqiang on 2018/3/10.
  */
-public class ModelValue extends Model {
+public class ModelValue<E> extends Model<E> {
 
     public ModelValue(){
 

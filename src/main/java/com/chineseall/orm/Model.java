@@ -13,7 +13,7 @@ import java.util.*;
  */
 
 
-public abstract class Model {
+public abstract class Model<E> {
     private boolean modified = true;
     private boolean model_saved = false;
     private boolean isproxy = false;
@@ -78,22 +78,69 @@ public abstract class Model {
         return String.format("%s%s|%s",Setting.REAL_CACHE_LOCAL_PREFIX, model_engine.getModelClass(),key_str);
     }
 
-    public static <E> E fetch(Class<E> clasz, Object[] key, boolean auto_create) throws ActiveRecordException {
-        // TODO: 2018/3/2
-        return null;
+    public static <E> E fetch(Object[] key, boolean auto_create) throws ActiveRecordException {
+        /*
+        根据 key 获取对象，如果 key 为 None 或者 (None,)，返回 None。
+        :param auto_create:
+        在获取不到对象时是否根据 key 新建一个（当 auto_creatable=True 时）
+        :rtype: Model
+        */
+
+        if(key==null || (key!=null&&key.length==0)){
+            //不允许传空的 key，如果真有需要再去掉这限制
+            throw new ActiveRecordException("empty key  for fetch");
+        }
+
+        ModelMeta meta = ModelMeta.getModelMeta(model_engine.getModelClass());
+
+        if(auto_create && !meta.autoCreatable){
+            throw new ActiveRecordException(model_engine.getModelClass().getName()+"  is not auto_creatable");
+        }
+
+        E instance = (E)model_engine.fetch(key, auto_create);
+
+        if(instance!=null && instance instanceof Model){
+            ((Model)instance).markFlushed();
+            ((Model)instance).model_saved = true;
+        }
+        return instance;
     }
 
-    public static <E> List<E> fetchMulti(Class<E> clasz, Object[] keys) throws ActiveRecordException {
-        // TODO: 2018/3/2
-        return null;
+    public static <E> List<E> fetchMulti(List<Object[]> keys) throws ActiveRecordException {
+        /*
+        一次性获取多个对象。
+        根据 keys 的顺序返回获取的对象，对象获取不到时为 None。
+        :type keys: list | __generator
+        :return: list[instance]
+        :rtype: list[Model]
+        */
+        List<E> instances=new ArrayList<E>();
+        if(keys==null || (keys!=null && keys.size()<=0)) {
+            return instances;
+        }
+        instances = model_engine.fetchMulti(keys);
+        for (E instance:
+            instances) {
+            if(instance!=null){
+                ((Model)instance).markFlushed();
+                ((Model)instance).model_saved = true;
+            }
+        }
+        return instances;
     }
 
     public void save() throws ActiveRecordException {
-//        model_engine.save();
+        if (!this.isModified())
+            return;
+
+        model_engine.save(this);
+
+        this.markFlushed();
+        this.model_saved = true;
     }
 
     public void delete() throws ActiveRecordException {
-
+        model_engine.delete(this.tuple_key());
     }
 
     public static <E> E create(Object[] key, Map<?, ?> iniValue) throws ActiveRecordException {
