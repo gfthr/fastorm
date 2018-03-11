@@ -25,6 +25,12 @@ public class ModelMeta {
     public Set<String> idFieldsSet;
     public Set<String> columnSet;
 
+    public ModelMeta(){
+
+        idFieldsSet = new HashSet<String>();
+        columnSet = new HashSet<String>();
+    }
+
     static {
         metaCache=new HashMap<Class<?>,ModelMeta>();
     }
@@ -64,7 +70,7 @@ public class ModelMeta {
 
             List<ColumnField> columnFields = new ArrayList<ColumnField>();
             List<IdField> idFields = new ArrayList<IdField>();
-            HashSet<String> idFieldsSet = new HashSet<String>();
+
 
             for (Field f : clasz.getDeclaredFields()) {
                 Id id = f.getAnnotation(Id.class);
@@ -74,7 +80,7 @@ public class ModelMeta {
                     field.setType(f.getType());
                     field.setField(f);
                     idFields.add(field);
-                    idFieldsSet.add(f.getName());
+//                    idFieldsSet.add(f.getName());
                     modelMeta.idFieldsSet.add(f.getName());
                 }
                 Column column = f.getAnnotation(Column.class);
@@ -84,7 +90,7 @@ public class ModelMeta {
                     field.setType(f.getType());
                     field.setField(f);
                     field.setDefault_value(column.default_value());
-                    if(idFieldsSet.contains(f.getName())){
+                    if(modelMeta.idFieldsSet.contains(f.getName())){
                         field.setIdField(true);
                     }else{
                         field.setIdField(false);
