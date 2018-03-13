@@ -2,9 +2,7 @@ package com.chineseall.orm.storage;
 
 import com.chineseall.orm.Model;
 import com.chineseall.orm.exception.ActiveRecordException;
-import com.chineseall.orm.exception.OrmNotImplementedException;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,11 +73,11 @@ public class CacheEngine<T> extends ModelEngine<T> {
             // 不存在，设 nonemark
             if (nonemark != null) {
                 nonemark.put(general_key, 0);
-            } else {
-                // 取到了，放缓存
-                if (ng_cache != null)
-                    ng_cache.save(instance);
             }
+        }else {
+            // 取到了，放缓存
+            if (ng_cache != null)
+                ng_cache.save(instance);
         }
         return instance;
     }

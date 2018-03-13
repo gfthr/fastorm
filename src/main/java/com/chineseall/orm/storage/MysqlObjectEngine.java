@@ -1,6 +1,5 @@
 package com.chineseall.orm.storage;
 
-import com.alibaba.fastjson.JSON;
 import com.chineseall.orm.Model;
 import com.chineseall.orm.exception.ActiveRecordException;
 

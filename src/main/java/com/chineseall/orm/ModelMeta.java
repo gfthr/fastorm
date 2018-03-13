@@ -1,9 +1,6 @@
 package com.chineseall.orm;
 
-import com.chineseall.orm.annotations.Column;
-import com.chineseall.orm.annotations.GeneratorType;
-import com.chineseall.orm.annotations.Id;
-import com.chineseall.orm.annotations.Table;
+import com.chineseall.orm.annotations.*;
 import com.chineseall.orm.exception.FieldAccessException;
 import com.chineseall.orm.field.ColumnField;
 import com.chineseall.orm.field.IdField;
@@ -13,6 +10,7 @@ import java.util.*;
 
 public class ModelMeta {
     private static Map<Class<?>,ModelMeta> metaCache;
+    public String db;
     public String table;
     //    String id;
     public GeneratorType idGeneratorType;
@@ -51,6 +49,10 @@ public class ModelMeta {
             return metaCache.get(clasz);
         }else{
             ModelMeta modelMeta = new ModelMeta();
+            Database dbAnnotation = clasz.getAnnotation(Database.class);
+            if (dbAnnotation != null) {
+                modelMeta.db = dbAnnotation.name();
+            }
 
             Table t = clasz.getAnnotation(Table.class);
             if (t != null) {

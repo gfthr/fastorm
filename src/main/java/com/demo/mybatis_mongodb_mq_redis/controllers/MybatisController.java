@@ -25,13 +25,27 @@ public class MybatisController {
             Map<String, Object> iniValue=new HashMap<String, Object>();
             iniValue.put("name", "name1");
             iniValue.put("addr", "addr1");
-            User user = User.create(new Object[]{1,2}, iniValue);
+            User user = User.create(new Object[]{13,2}, iniValue);
             user.save();
         }catch (Exception ex){
             ex.printStackTrace();
         }
 
         return mybatisService.list();
+    }
+
+    @RequestMapping("/get")
+    public User get()
+    {
+        User user= null;
+        try {
+            user= User.fetch(new Object[]{12,2},false);
+
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+
+        return user;
     }
 
 

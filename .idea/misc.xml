@@ -7,6 +7,10 @@
     <option name="originalFiles">
       <list>
         <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/../mybatis/pom.xml" />
+        <option value="$PROJECT_DIR$/../spring/pom.xml" />
+        <option value="$PROJECT_DIR$/../spring-boot-starter/pom.xml" />
+        <option value="$PROJECT_DIR$/../parent/pom.xml" />
       </list>
     </option>
   </component>

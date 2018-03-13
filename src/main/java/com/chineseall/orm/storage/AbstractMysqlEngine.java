@@ -1,29 +1,32 @@
 package com.chineseall.orm.storage;
 
 import com.alibaba.fastjson.JSON;
-import com.chineseall.orm.ConvertUtil;
-import com.chineseall.orm.DaoSupport;
-import com.chineseall.orm.Model;
-import com.chineseall.orm.ModelMeta;
+import com.chineseall.orm.*;
+import com.chineseall.orm.adapters.Adapter;
+import com.chineseall.orm.connections.ConnectionProvider;
 import com.chineseall.orm.exception.ActiveRecordException;
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * Created by wangqiang on 2018/3/5.
  * 提供基本的 SQL 生成和数据库操作。
  */
 public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
-    DaoSupport dao = new DaoSupport(null);
+    DbClient dbClient;
     protected String table;
     protected String view;
     protected String delete_mark;
 
+    //连接提供者
+    private static Map<String,ConnectionProvider> connections = new HashMap<String,ConnectionProvider>();
+    //数据库适配器（方言）
+    private static Map<String,Adapter> adapters = new HashMap<String,Adapter>();
 
     public AbstractMysqlEngine(Class<T> model_class, String table, String delete_mark, String view){
         super(model_class);
@@ -33,6 +36,70 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
         this.table = table;
         this.delete_mark = delete_mark;
         this.view = view;
+        ModelMeta meta = ModelMeta.getModelMeta(this.model_class);
+        dbClient =new DbClient(connections.get(meta.db));
+    }
+
+    static {
+        try{
+            DatabaseConfReader reader = new DatabaseConfReader();
+            reader.init();
+            connections = reader.getConnections();
+            adapters = reader.getAdapters();
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 取得数据库连接提供者
+     * @param c 指定的数据库连接所绑定的类class
+     * @return 连接提供者
+     */
+    public static ConnectionProvider getConnectionProvider(Class<?> c) {
+        return connections.get(getBaseClassName(c));
+    }
+
+    /**
+     * 设置数据库连接提供者
+     * @param dbName 域基类，由它登记数据库连接信息
+     * @param cp 连接提供者
+     */
+    public static void putConnectionProvider(String dbName, ConnectionProvider cp){
+        connections.put(dbName, cp);
+    }
+
+    /**
+     * 取得数据库适配器
+     * @param c 指定的数据库连接所绑定的类class
+     * @return 数据库适配器
+     */
+    public static Adapter getConnectionAdapter(Class<?> c){
+        return adapters.get(getBaseClassName(c));
+    }
+
+    /**
+     * 设置连接适配器
+     * @param domainClassName 域基类，由它登记数据库连接信息
+     * @param adapter 适配器
+     */
+    public static void putConnectionAdapter(String domainClassName, Adapter adapter){
+        adapters.put(domainClassName, adapter);
+    }
+
+    private static String getBaseClassName(Class<?> c){
+        String className = c.getCanonicalName();
+        ConnectionProvider cp = connections.get(className);
+        while (cp == null){
+            c = c.getSuperclass();
+            if (c == null) {
+                return null;
+            }
+            className = c.getCanonicalName();
+            cp = connections.get(className);
+        }
+        return className;
     }
 
     protected String _sql_table(){
@@ -53,7 +120,7 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
         ModelMeta meta = ModelMeta.getModelMeta(this.model_class);
         String[]  keys= new String[meta.idFields.length];
         for (int i=0;i<meta.idFields.length;i++){
-            keys[i] = " "+meta.idFields[i].getName()+"=%s ";
+            keys[i] = " "+meta.idFields[i].getName()+"=? ";
         }
         return StringUtils.arrayToDelimitedString(keys,"AND");
     }
@@ -121,7 +188,7 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
         // INSERT INTO `table` (`column1`,`column2`) VALUES (%s,%s)
         String[] tmp = new String[column_names.length];
         for (int i = 0; i < column_names.length ; i++) {
-            tmp[i] ="%s";
+            tmp[i] ="?";
         }
         String sql_value_stub = StringUtils.arrayToDelimitedString(tmp,",");
         return String.format("INSERT INTO %s (%s) VALUES (%s)", this._sql_table(), this._gen_sql_columns(column_names),sql_value_stub);
@@ -131,9 +198,9 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
         List<Map<String,Object>> rows = null;
 
         if(!StringUtils.isEmpty(this.table)){
-            rows = dao.select(this._sql_select(), key,0,0);
+            rows = dbClient.select(this._sql_select(), key,0,0);
         }else if (!StringUtils.isEmpty(this.view)){
-            rows = dao.select(this.view, key,0,0);
+            rows = dbClient.select(this.view, key,0,0);
         }
 
         Map<String,Object> result_dict =null;
@@ -145,10 +212,7 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
             result_dict = rows.get(0);
         }
         return result_dict;
-
     }
-
-
 
     public T fetch(Object[] key, boolean auto_create) throws ActiveRecordException {
         Object result= null;
@@ -244,7 +308,7 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
             for (Object key :tuple_keys){
                 Object[] tuple_key=(Object[])key;
                 List<Map<String,Object>> _rows = null;
-                _rows = dao.select(this._sql_select(), tuple_key,0,0);
+                _rows = dbClient.select(this._sql_select(), tuple_key,0,0);
                 if(_rows.size()>1){
                     throw new ActiveRecordException("Multiple rows returned for fetch() query");
                 }
@@ -266,7 +330,7 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
             }
             String sql_in = StringUtils.arrayToDelimitedString(sql_in_array,",");
             String sql = String.format(this._sql_multi_select_by_in(),sql_in);
-            rows = dao.select(sql, sql_params,0,0);
+            rows = dbClient.select(sql, sql_params,0,0);
         }else{
             Object[] sql_params = new Object[count*key_columns.length];
             for (int i=0;i<tuple_keys.size();i++) {
@@ -275,7 +339,7 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
                 }
             }
             String sql = this._gen_sql_multi_select_by_union(count);
-            rows = dao.select(sql, sql_params,0,0);
+            rows = dbClient.select(sql, sql_params,0,0);
         }
         // 将 rows 按 tuple_keys 排序
 //        extract_key = lambda row: tuple(row[name] for name in identifier)
@@ -317,7 +381,7 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
             // WHERE `key1`=%s AND`key2`=%s
             String sql_update = String.format(this._sql_update(),str_sql_set);
             Object[] values =  ArrayUtils.addAll(column_values, tuple_key);
-            row_count = dao.execute(sql_update,values);
+            row_count = dbClient.execute(sql_update,values);
 
         }else{
             ModelMeta meta = ModelMeta.getModelMeta(this.model_class);
@@ -326,9 +390,9 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
 
             if(key_columns.length==1 && tuple_key[0]==null){
                 //只有单个 key 且为空，由数据库生成 key 并设回实体中
-                row_count = dao.execute(this._sql_insert_without_key(),column_values);
+                row_count = dbClient.execute(this._sql_insert_without_key(),column_values);
 
-                Object last_id = dao.executeScalar("select last_insert_id()", null);
+                Object last_id = dbClient.executeScalar("select last_insert_id()", null);
                 Object id = ConvertUtil.castFromObject(last_id.toString(), meta.idFields[0].getType());
 
                 meta.setFieldValue(this.model_class,meta.idFields[0].getName(),model,id);
@@ -337,7 +401,7 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
                 // 注：虽然这里支持多个 key 的插入，但不能用这些 key 作为主键
                 // 表里必须要有额外的主键
                 Object[] values =  ArrayUtils.addAll(tuple_key, column_values);
-                row_count=  dao.execute(this._sql_insert_with_key(),values);
+                row_count=  dbClient.execute(this._sql_insert_with_key(),values);
             }
         }
         if (row_count != 1)
@@ -349,7 +413,7 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
             return;
         }
         try {
-            dao.execute(this._sql_delete(),key_values);
+            dbClient.execute(this._sql_delete(),key_values);
         }catch (Exception ex){
             throw new ActiveRecordException("delete error:"+ ex.getMessage());
         }

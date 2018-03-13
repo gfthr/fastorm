@@ -4,7 +4,6 @@ import com.chineseall.orm.ModelMeta;
 import com.chineseall.orm.exception.ActiveRecordException;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,11 +23,11 @@ public abstract class ModelEngine<T> {
 
     public Object model_class_create(Object[] key, Object result_data) throws ActiveRecordException {
 
-        return this.model_class_invoke_method(null, "create", new Class[]{Class.class, Object[].class, HashMap.class}, new Object[]{this.model_class, key, result_data});
+        return this.model_class_invoke_method(null, "create", new Class[]{key.getClass(), Map.class}, new Object[]{key, result_data});
     }
 
     public String model_class_gen_general_key(Object[] tuple_key) throws ActiveRecordException {
-        return (String) this.model_class_invoke_method(null, "gen_general_key", new Class[]{Object[].class}, new Object[]{tuple_key});
+        return (String) this.model_class_invoke_method(null, "gen_general_key", new Class[]{tuple_key.getClass()}, new Object[]{tuple_key});
     }
 
     public Object model_class_invoke_method(Object object, String methodName, Class[] paras, Object[] para_values) throws ActiveRecordException {

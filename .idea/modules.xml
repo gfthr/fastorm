@@ -3,6 +3,17 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/fastorm.iml" filepath="$PROJECT_DIR$/fastorm.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../mybatis/mybatis.iml" filepath="$PROJECT_DIR$/../mybatis/mybatis.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../parent/mybatis-parent.iml" filepath="$PROJECT_DIR$/../parent/mybatis-parent.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../spring/mybatis-spring.iml" filepath="$PROJECT_DIR$/../spring/mybatis-spring.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../spring-boot-starter/mybatis-spring-boot.iml" filepath="$PROJECT_DIR$/../spring-boot-starter/mybatis-spring-boot.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../spring-boot-starter/mybatis-spring-boot-autoconfigure/mybatis-spring-boot-autoconfigure.iml" filepath="$PROJECT_DIR$/../spring-boot-starter/mybatis-spring-boot-autoconfigure/mybatis-spring-boot-autoconfigure.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../spring-boot-starter/mybatis-spring-boot-samples/mybatis-spring-boot-sample-annotation/mybatis-spring-boot-sample-annotation.iml" filepath="$PROJECT_DIR$/../spring-boot-starter/mybatis-spring-boot-samples/mybatis-spring-boot-sample-annotation/mybatis-spring-boot-sample-annotation.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../spring-boot-starter/mybatis-spring-boot-samples/mybatis-spring-boot-sample-xml/mybatis-spring-boot-sample-xml.iml" filepath="$PROJECT_DIR$/../spring-boot-starter/mybatis-spring-boot-samples/mybatis-spring-boot-sample-xml/mybatis-spring-boot-sample-xml.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../spring-boot-starter/mybatis-spring-boot-samples/mybatis-spring-boot-samples.iml" filepath="$PROJECT_DIR$/../spring-boot-starter/mybatis-spring-boot-samples/mybatis-spring-boot-samples.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../spring-boot-starter/mybatis-spring-boot-starter/mybatis-spring-boot-starter.iml" filepath="$PROJECT_DIR$/../spring-boot-starter/mybatis-spring-boot-starter/mybatis-spring-boot-starter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../spring-boot-starter/mybatis-spring-boot-starter-test/mybatis-spring-boot-starter-test.iml" filepath="$PROJECT_DIR$/../spring-boot-starter/mybatis-spring-boot-starter-test/mybatis-spring-boot-starter-test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../spring-boot-starter/mybatis-spring-boot-test-autoconfigure/mybatis-spring-boot-test-autoconfigure.iml" filepath="$PROJECT_DIR$/../spring-boot-starter/mybatis-spring-boot-test-autoconfigure/mybatis-spring-boot-test-autoconfigure.iml" />
     </modules>
   </component>
 </project>

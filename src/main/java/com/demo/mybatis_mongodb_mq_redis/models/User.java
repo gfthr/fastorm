@@ -1,21 +1,14 @@
 package com.demo.mybatis_mongodb_mq_redis.models;
 
-import com.chineseall.orm.Model;
 import com.chineseall.orm.ModelObject;
 import com.chineseall.orm.annotations.*;
-import com.chineseall.orm.storage.MysqlObjectEngine;
 
 /**
  * Created by wangqiang on 2018/2/25.
  */
-
-
+@Database(name = "testdb1")
 @Table(name = "users", generate = GeneratorType.AUTO,engine = ModelEngineType.CACHE_MYSQL_OBJECT)
 public class User extends ModelObject<User> {
-//    static {
-//        model_engine = new MysqlObjectEngine(User.class, "users",null,null);
-//    }
-
     @Id
     @Column
     private Integer id;

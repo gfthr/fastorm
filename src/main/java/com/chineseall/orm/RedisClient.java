@@ -52,7 +52,7 @@ public class RedisClient {
     }
 
     public static Jedis getResource() {
-        return jedisPool.getResource();
+        return getJedisPool().getResource();
     }
 
     private static JedisPool getJedisPool() {

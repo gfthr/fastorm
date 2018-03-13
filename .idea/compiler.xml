@@ -23,11 +23,30 @@
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
         <module name="fastorm" />
+        <module name="mybatis" />
+        <module name="mybatis-spring" />
+        <module name="mybatis-spring-boot-autoconfigure" />
+        <module name="mybatis-spring-boot-sample-annotation" />
+        <module name="mybatis-spring-boot-sample-xml" />
+        <module name="mybatis-spring-boot-starter" />
+        <module name="mybatis-spring-boot-starter-test" />
+        <module name="mybatis-spring-boot-test-autoconfigure" />
         <module name="mybatis_mongodb_mq_redis" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="fastorm" target="1.8" />
+      <module name="mybatis" target="1.5" />
+      <module name="mybatis-parent" target="1.6" />
+      <module name="mybatis-spring" target="1.8" />
+      <module name="mybatis-spring-boot" target="1.8" />
+      <module name="mybatis-spring-boot-autoconfigure" target="1.8" />
+      <module name="mybatis-spring-boot-sample-annotation" target="1.8" />
+      <module name="mybatis-spring-boot-sample-xml" target="1.8" />
+      <module name="mybatis-spring-boot-samples" target="1.8" />
+      <module name="mybatis-spring-boot-starter" target="1.8" />
+      <module name="mybatis-spring-boot-starter-test" target="1.8" />
+      <module name="mybatis-spring-boot-test-autoconfigure" target="1.8" />
       <module name="mybatis_mongodb_mq_redis" target="1.8" />
     </bytecodeTargetLevel>
   </component>
