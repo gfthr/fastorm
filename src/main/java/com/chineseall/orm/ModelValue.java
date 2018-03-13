@@ -15,16 +15,16 @@ public class ModelValue<T> extends Model<T> {
     }
 
     public Map<String,Object> demodelize(){
-        ModelMeta meta = ModelMeta.getModelMeta(model_engine.getModelClass());
+        ModelMeta meta = ModelMeta.getModelMeta(getModelEngine().getModelClass());
         return this.dump(meta.get_column_names());
     }
 
-    public static<T> T create(Object[] key, Object value) throws FastOrmException {
-        ModelMeta meta = ModelMeta.getModelMeta(model_engine.getModelClass());
+    public static<T> T create(Class<?> classz, Object[] key, Object value) throws FastOrmException {
+        ModelMeta meta = ModelMeta.getModelMeta(classz);
         String valueColumnName = meta.get_column_names()[0];
         Map<String,Object> datadict= new HashMap<String,Object>();
         datadict.put(valueColumnName,value);
-        return Model.create(key,datadict);
+        return Model.create(classz, key,datadict);
 
     }
 }

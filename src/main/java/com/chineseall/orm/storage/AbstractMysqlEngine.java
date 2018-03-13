@@ -383,7 +383,7 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
             // WHERE `key1`=%s AND`key2`=%s
             String sql_update = String.format(this._sql_update(),str_sql_set);
             Object[] values =  ArrayUtils.addAll(column_values, tuple_key);
-            row_count = dbClient.execute(sql_update,values);
+            row_count = (Integer) dbClient.execute(sql_update,values, false)[0];
 
         }else{
             ModelMeta meta = ModelMeta.getModelMeta(this.model_class);
@@ -392,10 +392,10 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
 
             if(key_columns.length==1 && tuple_key[0]==null){
                 //只有单个 key 且为空，由数据库生成 key 并设回实体中
-                row_count = dbClient.execute(this._sql_insert_without_key(),column_values);
-
-                Object last_id = dbClient.executeScalar("select last_insert_id()", null);
-                Object id = ConvertUtil.castFromObject(last_id.toString(), meta.idFields[0].getType());
+                Object[] result = dbClient.execute(this._sql_insert_without_key(),column_values, true);
+                row_count =  (Integer) result[0];
+                Object last_id = result[1];
+                Object id = ConvertUtil.castFromObject(last_id!=null?last_id.toString():null, meta.idFields[0].getType());
 
                 meta.setFieldValue(this.model_class,meta.idFields[0].getName(),model,id);
             } else {
@@ -403,7 +403,7 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
                 // 注：虽然这里支持多个 key 的插入，但不能用这些 key 作为主键
                 // 表里必须要有额外的主键
                 Object[] values =  ArrayUtils.addAll(tuple_key, column_values);
-                row_count=  dbClient.execute(this._sql_insert_with_key(),values);
+                row_count=   (Integer)dbClient.execute(this._sql_insert_with_key(),values,false)[0];
             }
         }
         if (row_count != 1)
@@ -415,7 +415,7 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
             return;
         }
         try {
-            dbClient.execute(this._sql_delete(),key_values);
+            dbClient.execute(this._sql_delete(),key_values,false);
         }catch (Exception ex){
             throw new FastOrmException("delete error:"+ ex.getMessage());
         }

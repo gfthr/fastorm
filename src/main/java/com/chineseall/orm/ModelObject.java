@@ -8,7 +8,7 @@ import java.util.Map;
 public class ModelObject<T> extends Model<T> {
 
     public Map<String,Object> demodelize(){
-        ModelMeta meta = ModelMeta.getModelMeta(model_engine.getModelClass());
+        ModelMeta meta = ModelMeta.getModelMeta(getModelEngine().getModelClass());
         return this.dump(meta.get_column_names());
     }
 

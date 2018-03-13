@@ -2,13 +2,9 @@ package com.chineseall.orm;
 
 import com.chineseall.orm.annotations.ModelEngineType;
 import com.chineseall.orm.annotations.Table;
-import com.chineseall.orm.storage.CacheEngine;
-import com.chineseall.orm.storage.MysqlObjectEngine;
-import com.chineseall.orm.storage.MysqlValueEngine;
-import com.chineseall.orm.storage.RedisEngine;
+import com.chineseall.orm.storage.*;
 import org.reflections.Reflections;
 
-import java.lang.reflect.Field;
 import java.util.Set;
 
 public class ModelScanner {
@@ -26,10 +22,8 @@ public class ModelScanner {
             for (Class<?> classz : classesList) {
                 //得到该类下面的所有方法
                 Table t = (Table)classz.getAnnotation(Table.class);
-                Object engineObj= getEngine(t.engine(),classz,t.name(),t.deleteMark(),t.view(),t.column());
-                Field engineField= classz.getField("model_engine");
-                engineField.setAccessible(true);
-                engineField.set(null, engineObj);
+                ModelEngine engineObj= getEngine(t.engine(),classz,t.name(),t.deleteMark(),t.view(),t.column());
+                ModelProxy.pushModelEngine(classz, engineObj);
             }
 
         }catch (Exception e){
@@ -37,7 +31,7 @@ public class ModelScanner {
         }
     }
 
-    public static<E> Object getEngine(ModelEngineType type, Class<E> modelClass, String table,String deleteMark, String view,String column){
+    public static<E> ModelEngine getEngine(ModelEngineType type, Class<E> modelClass, String table, String deleteMark, String view, String column){
         if(type==ModelEngineType.CACHE_MYSQL_OBJECT){
             return CacheEngine.getMysqlObjectCacheEngine(modelClass, table,  deleteMark,  view,null,null);
         }else if (type==ModelEngineType.CACHE_MYSQL_VALUE){

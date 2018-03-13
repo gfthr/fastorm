@@ -197,9 +197,10 @@ public class DbClient {
         sql = sqlParts[0].toString();
         args = (Object[])sqlParts[1];
         String sqlInfo = sqlParts[2].toString();
+        Connection conn = null;
         try{
         	long t1 = System.currentTimeMillis();
-            Connection conn=this.cp.getConnection();
+            conn=this.cp.getConnection();
             pstmt = conn.prepareStatement(sql);
             if (args != null){
                 for(int i=0; i<args.length; i++){
@@ -248,6 +249,9 @@ public class DbClient {
                 }
                 if (pstmt != null){
                     pstmt.close();
+                }
+                if (conn != null){
+                    conn.close();
                 }
             }
             catch(SQLException e){
@@ -304,16 +308,19 @@ public class DbClient {
         return data;
     }*/
     
-    public int execute(String sql, Object[] args) throws DataAccessException{
+    public Object[] execute(String sql, Object[] args, boolean isInsert) throws DataAccessException{
+        Object[] result= new Object[]{0,null};
+
         int updated = 0;
         Object[] sqlParts = buildSql(sql, args);
         sql = sqlParts[0].toString();
         args = (Object[])sqlParts[1];
         String sqlInfo = sqlParts[2].toString();
+        Connection conn = null;
         PreparedStatement pstmt = null;
         try{
         	long t1 = System.currentTimeMillis();
-            Connection conn=this.cp.getConnection();
+            conn=this.cp.getConnection();
             pstmt = conn.prepareStatement(sql);
             if (args != null){
                 for(int i=0; i<args.length; i++){
@@ -321,6 +328,15 @@ public class DbClient {
                 }
             }
             updated = pstmt.executeUpdate();
+
+            result[0]=updated;
+            if(isInsert){
+                PreparedStatement insert_pstmt = conn.prepareStatement("select last_insert_id()");
+                ResultSet rs = insert_pstmt.executeQuery();
+                if (rs.next()){
+                    result[1] = rs.getObject(1);
+                }
+            }
             
             long t2 = System.currentTimeMillis();
             if (log.isDebugEnabled()){
@@ -335,15 +351,18 @@ public class DbClient {
                 if (pstmt != null){
                     pstmt.close();
                 }
+                if(conn!=null){
+                    conn.close();
+                }
             }
             catch(SQLException e){
                 throw new DataAccessException(e);
             }
         }
-        return updated;
+        return result;
     }
     
-    public Object executeScalar(String sql, Object[] args) throws DataAccessException{
+    /*public Object executeScalar(String sql, Object[] args) throws DataAccessException{
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         Object scalar = null;
@@ -388,7 +407,7 @@ public class DbClient {
             }
         }
         return scalar;
-    }
+    }*/
     
     /**
      * 构建SQL语句，处理掉NULL值参数

@@ -23,11 +23,11 @@ public abstract class ModelEngine<T> {
 
     public Object model_class_create(Object[] key, Object result_data) throws FastOrmException {
 
-        return this.model_class_invoke_method(null, "create", new Class[]{key.getClass(), Map.class}, new Object[]{key, result_data});
+        return this.model_class_invoke_method(null, "create", new Class[]{Class.class, key.getClass(), Map.class}, new Object[]{this.model_class, key, result_data});
     }
 
     public String model_class_gen_general_key(Object[] tuple_key) throws FastOrmException {
-        return (String) this.model_class_invoke_method(null, "gen_general_key", new Class[]{tuple_key.getClass()}, new Object[]{tuple_key});
+        return (String) this.model_class_invoke_method(null, "gen_general_key", new Class[]{Class.class, tuple_key.getClass()}, new Object[]{this.model_class, tuple_key});
     }
 
     public Object model_class_invoke_method(Object object, String methodName, Class[] paras, Object[] para_values) throws FastOrmException {

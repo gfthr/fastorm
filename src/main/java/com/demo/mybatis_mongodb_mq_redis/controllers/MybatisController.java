@@ -1,5 +1,6 @@
 package com.demo.mybatis_mongodb_mq_redis.controllers;
 
+import com.demo.mybatis_mongodb_mq_redis.models.Auto;
 import com.demo.mybatis_mongodb_mq_redis.models.Mybatis;
 import com.demo.mybatis_mongodb_mq_redis.models.User;
 import com.demo.mybatis_mongodb_mq_redis.services.IMybatisService;
@@ -25,7 +26,7 @@ public class MybatisController {
             Map<String, Object> iniValue=new HashMap<String, Object>();
             iniValue.put("name", "name1");
             iniValue.put("addr", "addr1");
-            User user = User.create(new Object[]{13,2}, iniValue);
+            User user = User.create(User.class, new Object[]{13,2}, iniValue);
             user.save();
         }catch (Exception ex){
             ex.printStackTrace();
@@ -39,7 +40,7 @@ public class MybatisController {
     {
         User user= null;
         try {
-            user= User.fetch(new Object[]{12,2},false);
+            user= User.fetch(User.class, new Object[]{12,2},false);
 
         }catch (Exception ex){
             ex.printStackTrace();
@@ -47,6 +48,22 @@ public class MybatisController {
 
         return user;
     }
+
+    @RequestMapping("/auto")
+    public Auto auto()
+    {
+        Auto auto = null;
+        try {
+            auto = Auto.create(Auto.class, null,null);
+            auto.setName("good");
+            auto.save();
+            System.out.print("Auto "+auto.getId());
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+        return auto;
+    }
+
 
 
 }
