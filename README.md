@@ -10,7 +10,7 @@ Forget hibernate and mybatis it, fastOrm will achieve the best Java and Orm base
 
 2）不支持一对多、一对一等关联关系，这类东西在高并发网站不需要
 
-3）使用简单，配置简单，无xml文件（抛弃mybatis吧，那是反人类的），通过注解指定ID字段生成类型，通过注解指定乐观锁版本字段，通过注解指定删除标志字段
+3）使用简单，配置简单，无xml文件，通过注解指定ID字段生成类型，通过注解指定乐观锁版本字段，通过注解指定删除标志字段
 
 4）支持原生SQL语句，调优方便
 
