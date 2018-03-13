@@ -126,18 +126,17 @@ public class CacheEngine<T> extends ModelEngine<T> {
             Object[] tuple_key = rest_tuple_keys.get(i);
             Integer index = rest_indices.get(i);
             T instance = rest_instances.get(i);
-            if (instance != null) {
+            if (instance == null) {
                 // 没取到，设 nonemark
                 if (nonemark != null) {
                     nonemark.put(this.to_general_key(tuple_key), 0);
-                } else {
-                    // 取到了，设到结果里
-                    instances.set(index, instance);
-                    // 放缓存
-                    if (ng_cache != null)
-                        ng_cache.save(instance);
                 }
-
+            }else {
+                // 取到了，设到结果里
+                instances.set(index, instance);
+                // 放缓存
+                if (ng_cache != null)
+                    ng_cache.save(instance);
             }
         }
         return instances;

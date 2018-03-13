@@ -63,16 +63,17 @@ public class RedisEngine<T> extends ModelEngine<T>{
         List<String> store_data_list =  RedisClient.getResource().mget(store_keys);
 
         List<T> instances=new ArrayList<T>();
-        for (String store_data:store_data_list
-             ) {
+        for (int i = 0; i < store_data_list.size(); i++) {
+            String store_data = store_data_list.get(i);
+            Object[] tuple_key = keys.get(i);
             T instance =null;
             if(!StringUtils.isEmpty(store_data)){
                 Map<String, Object> data = this.deserialize(store_data);
-                Object[] tuple_key = getKeyValue(data);
                 instance = (T)model_class_create(tuple_key, data);
             }
             instances.add(instance);
         }
+      
         return instances;
     }
 

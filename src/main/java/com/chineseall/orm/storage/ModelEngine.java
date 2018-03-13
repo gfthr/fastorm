@@ -43,7 +43,7 @@ public abstract class ModelEngine<T> {
 
     protected Object[] getKeyValue(Map<String,Object> data_dict){
         ModelMeta meta = ModelMeta.getModelMeta(this.model_class);
-        Object[] key_values = new String[meta.idFields.length];
+        Object[] key_values = new Object[meta.idFields.length];
         for (int i=0;i<meta.idFields.length;i++){
             key_values[i] = data_dict.get(meta.idFields[i].getName());
         }

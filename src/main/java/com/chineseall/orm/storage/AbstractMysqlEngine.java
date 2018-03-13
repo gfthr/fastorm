@@ -328,7 +328,7 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
 
             String[] sql_in_array = new String[count];
             for (int i=0;i<count;i++){
-                sql_in_array[i] = "%s";
+                sql_in_array[i] = "?";
             }
             String sql_in = StringUtils.arrayToDelimitedString(sql_in_array,",");
             String sql = String.format(this._sql_multi_select_by_in(),sql_in);

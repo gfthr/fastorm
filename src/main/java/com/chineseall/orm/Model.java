@@ -125,14 +125,11 @@ public abstract class Model<T> {
 
         T instance = (T)ModelProxy.getModelEngine(classz).fetch(key, auto_create);
 
-        ModelProxy proxy = new ModelProxy();
-        T obj = (T)proxy.getProxyObject(classz);
-
-        if(obj!=null && obj instanceof Model){
-            ((Model)obj).markFlushed();
-            ((Model)obj).model_saved = true;
+        if(instance!=null && instance instanceof Model){
+            ((Model)instance).markFlushed();
+            ((Model)instance).model_saved = true;
         }
-        return obj;
+        return instance;
     }
 
     public static <T> List<T> fetchMulti(Class<?> classz, List<Object[]> keys) throws FastOrmException {
@@ -149,21 +146,14 @@ public abstract class Model<T> {
         }
         instances = ModelProxy.getModelEngine(classz).fetchMulti(keys);
 
-        List<T> objs=new ArrayList<T>();
-
         for (T instance:
-            instances) {
+                instances) {
             if(instance!=null){
-                ModelProxy proxy = new ModelProxy();
-                T obj = (T)proxy.getProxyObject(classz);
-                ((Model)obj).markFlushed();
-                ((Model)obj).model_saved = true;
-                objs.add(obj);
-            }else{
-                objs.add(null);
+                ((Model)instance).markFlushed();
+                ((Model)instance).model_saved = true;
             }
         }
-        return objs;
+        return instances;
     }
 
     public void save() throws FastOrmException {

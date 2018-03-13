@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,6 +79,22 @@ public class MybatisController {
             ex.printStackTrace();
         }
         return other;
+    }
+
+    @RequestMapping("/othermulti")
+    public List<Other>otherMulti()
+    {
+        List<Other> others = new ArrayList<Other>();
+        try {
+            List<Object[]> keys=new ArrayList<Object[]>();
+            keys.add(new Object[]{1});
+            keys.add(new Object[]{2});
+            keys.add(new Object[]{3});
+            others = Other.fetchMulti(Other.class,keys );
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+        return others;
     }
 
 
