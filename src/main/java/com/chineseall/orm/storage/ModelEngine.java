@@ -1,7 +1,7 @@
 package com.chineseall.orm.storage;
 
 import com.chineseall.orm.ModelMeta;
-import com.chineseall.orm.exception.ActiveRecordException;
+import com.chineseall.orm.exception.FastOrmException;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -21,22 +21,22 @@ public abstract class ModelEngine<T> {
         return model_class;
     }
 
-    public Object model_class_create(Object[] key, Object result_data) throws ActiveRecordException {
+    public Object model_class_create(Object[] key, Object result_data) throws FastOrmException {
 
         return this.model_class_invoke_method(null, "create", new Class[]{key.getClass(), Map.class}, new Object[]{key, result_data});
     }
 
-    public String model_class_gen_general_key(Object[] tuple_key) throws ActiveRecordException {
+    public String model_class_gen_general_key(Object[] tuple_key) throws FastOrmException {
         return (String) this.model_class_invoke_method(null, "gen_general_key", new Class[]{tuple_key.getClass()}, new Object[]{tuple_key});
     }
 
-    public Object model_class_invoke_method(Object object, String methodName, Class[] paras, Object[] para_values) throws ActiveRecordException {
+    public Object model_class_invoke_method(Object object, String methodName, Class[] paras, Object[] para_values) throws FastOrmException {
         Object result = null;
         try {
             Method method = this.model_class.getMethod(methodName, paras);
             result = method.invoke(object, para_values);
         } catch (Exception ex) {
-            throw new ActiveRecordException("model_class_invoke_method " + methodName + " error :" + ex.getMessage());
+            throw new FastOrmException("model_class_invoke_method " + methodName + " error :" + ex.getMessage());
         }
         return result;
     }
@@ -58,11 +58,11 @@ public abstract class ModelEngine<T> {
 //        return array_new;
 //    }
 
-    public abstract T fetch(Object[] key, boolean auto_create) throws ActiveRecordException;
+    public abstract T fetch(Object[] key, boolean auto_create) throws FastOrmException;
 
-    public abstract List<T> fetchMulti(List<Object[]> keys) throws ActiveRecordException;
+    public abstract List<T> fetchMulti(List<Object[]> keys) throws FastOrmException;
 
-    public abstract void save(Object instance) throws ActiveRecordException;
+    public abstract void save(Object instance) throws FastOrmException;
 
-    public abstract void delete(Object[] key_values) throws ActiveRecordException;
+    public abstract void delete(Object[] key_values) throws FastOrmException;
 }

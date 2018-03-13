@@ -1,10 +1,5 @@
 package com.chineseall.orm;
 
-import com.chineseall.orm.exception.ActiveRecordException;
-import com.chineseall.orm.field.ColumnField;
-import com.chineseall.orm.field.IdField;
-
-import java.util.HashMap;
 import java.util.Map;
 
 /**

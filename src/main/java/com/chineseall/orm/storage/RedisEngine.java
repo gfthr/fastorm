@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.chineseall.orm.Model;
 import com.chineseall.orm.RedisClient;
 import com.chineseall.orm.Setting;
-import com.chineseall.orm.exception.ActiveRecordException;
+import com.chineseall.orm.exception.FastOrmException;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ public class RedisEngine<T> extends ModelEngine<T>{
     }
 
 
-    public T fetch(Object[] key, boolean auto_create) throws ActiveRecordException {
+    public T fetch(Object[] key, boolean auto_create) throws FastOrmException {
         String store_key = model_class_gen_general_key(key);
         String store_data = RedisClient.getResource().get(store_key);
 
@@ -52,7 +52,7 @@ public class RedisEngine<T> extends ModelEngine<T>{
         return null;
     }
 
-    public List<T> fetchMulti(List<Object[]> keys) throws ActiveRecordException{
+    public List<T> fetchMulti(List<Object[]> keys) throws FastOrmException {
         if(keys==null){
             return new ArrayList<T>();
         }
@@ -76,15 +76,15 @@ public class RedisEngine<T> extends ModelEngine<T>{
         return instances;
     }
 
-    public void save(Object instance) throws ActiveRecordException{
+    public void save(Object instance) throws FastOrmException {
         if(!(instance instanceof Model))
-            throw new ActiveRecordException("instance is not model");
+            throw new FastOrmException("instance is not model");
         Model model =(Model)instance;
         Object[] tuple_key = model.tuple_key();
 
         // redis 不允许 None 的 key
         if(tuple_key==null){
-            throw new ActiveRecordException("None key in save()");
+            throw new FastOrmException("None key in save()");
         }
 
         String store_key = model.general_key();
@@ -97,16 +97,16 @@ public class RedisEngine<T> extends ModelEngine<T>{
         }
     }
 
-    public void delete(Object[] key_values) throws ActiveRecordException {
+    public void delete(Object[] key_values) throws FastOrmException {
         String store_key = model_class_gen_general_key(key_values);
         RedisClient.getResource().del(store_key);
     }
 
-    public String serialize(Model model) throws ActiveRecordException{
+    public String serialize(Model model) throws FastOrmException {
         return JSON.toJSONString(model.demodelize());
     }
 
-    public Map<String, Object> deserialize(String store_data) throws ActiveRecordException{
+    public Map<String, Object> deserialize(String store_data) throws FastOrmException {
         return JSON.parseObject(store_data, Map.class);
     }
 }

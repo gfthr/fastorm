@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.chineseall.orm.*;
 import com.chineseall.orm.adapters.Adapter;
 import com.chineseall.orm.connections.ConnectionProvider;
-import com.chineseall.orm.exception.ActiveRecordException;
+import com.chineseall.orm.exception.FastOrmException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.util.StringUtils;
 
@@ -31,7 +31,7 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
     public AbstractMysqlEngine(Class<T> model_class, String table, String delete_mark, String view){
         super(model_class);
         if((!StringUtils.isEmpty(table) ||!StringUtils.isEmpty(delete_mark)) && !StringUtils.isEmpty(view)){
-            new ActiveRecordException("both (table or delete_mark) and view are set").printStackTrace();
+            new FastOrmException("both (table or delete_mark) and view are set").printStackTrace();
         }
         this.table = table;
         this.delete_mark = delete_mark;
@@ -194,7 +194,7 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
         return String.format("INSERT INTO %s (%s) VALUES (%s)", this._sql_table(), this._gen_sql_columns(column_names),sql_value_stub);
     }
 
-    protected Map<String,Object> _fetch_row_(Object[] key) throws ActiveRecordException{
+    protected Map<String,Object> _fetch_row_(Object[] key) throws FastOrmException {
         List<Map<String,Object>> rows = null;
 
         if(!StringUtils.isEmpty(this.table)){
@@ -207,14 +207,14 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
         if (rows==null){
             result_dict =null;
         }else if(rows.size()>1){
-            throw  new ActiveRecordException("Multiple rows returned for fetch() query");
+            throw  new FastOrmException("Multiple rows returned for fetch() query");
         }else{
             result_dict = rows.get(0);
         }
         return result_dict;
     }
 
-    public T fetch(Object[] key, boolean auto_create) throws ActiveRecordException {
+    public T fetch(Object[] key, boolean auto_create) throws FastOrmException {
         Object result= null;
         try {
             Map<String,Object> result_row = this._fetch_row_(key);
@@ -250,12 +250,12 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
                 result_data = this._row_to_value_(result_row);
             }
             if (result_data ==null){
-                throw new ActiveRecordException("None in re-fetch auto_create instance");
+                throw new FastOrmException("None in re-fetch auto_create instance");
             }
             return (T)model_class_create(key, result_data);
 
         }catch (Exception ex){
-            throw new ActiveRecordException("fetch error :"+ex.getMessage());
+            throw new FastOrmException("fetch error :"+ex.getMessage());
         }
 //        return result;
     }
@@ -294,7 +294,7 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
         return StringUtils.arrayToDelimitedString(sql_selects, " UNION ALL ");
     }
 
-    protected List<Map<String,Object>> _fetch_rows_(List<Object[]> tuple_keys) throws ActiveRecordException {
+    protected List<Map<String,Object>> _fetch_rows_(List<Object[]> tuple_keys) throws FastOrmException {
 
         List<Map<String,Object>> rows = new ArrayList<Map<String,Object>>();
         int count = tuple_keys.size();
@@ -310,7 +310,7 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
                 List<Map<String,Object>> _rows = null;
                 _rows = dbClient.select(this._sql_select(), tuple_key,0,0);
                 if(_rows.size()>1){
-                    throw new ActiveRecordException("Multiple rows returned for fetch() query");
+                    throw new FastOrmException("Multiple rows returned for fetch() query");
                 }
                 rows.add(_rows.get(0));
             }
@@ -349,12 +349,12 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
     }
 
 
-    public void save(Object instance) throws ActiveRecordException{
+    public void save(Object instance) throws FastOrmException {
         if(!StringUtils.isEmpty(this.view)){
-            throw new ActiveRecordException("put unsaved entity to view");
+            throw new FastOrmException("put unsaved entity to view");
         }
         if(!(instance instanceof Model)){
-            throw new ActiveRecordException("instance must be Model");
+            throw new FastOrmException("instance must be Model");
         }
 
         int row_count=0 ;
@@ -370,7 +370,7 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
             Object[] column_values= (Object[])column_result[1];
 
             if (column_names ==null)
-                throw new ActiveRecordException("empty update_columns for put()");
+                throw new FastOrmException("empty update_columns for put()");
 
             String[] sql_set =new String[column_names.length];
             for (int i=0;i<column_names.length;i++){
@@ -405,17 +405,17 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
             }
         }
         if (row_count != 1)
-            throw new ActiveRecordException("affect "+row_count+" rows in put-insert");
+            throw new FastOrmException("affect "+row_count+" rows in put-insert");
     }
 
-    public void delete(Object[] key_values) throws ActiveRecordException{
+    public void delete(Object[] key_values) throws FastOrmException {
         if(!StringUtils.isEmpty(this.view)){
             return;
         }
         try {
             dbClient.execute(this._sql_delete(),key_values);
         }catch (Exception ex){
-            throw new ActiveRecordException("delete error:"+ ex.getMessage());
+            throw new FastOrmException("delete error:"+ ex.getMessage());
         }
 
     }

@@ -4,7 +4,7 @@ package com.chineseall.orm.exception;
  * 数据验证异常类
  * @author stworthy
  */
-public class ValidateException extends ActiveRecordException {
+public class ValidateException extends FastOrmException {
     /**
 	 * 
 	 */

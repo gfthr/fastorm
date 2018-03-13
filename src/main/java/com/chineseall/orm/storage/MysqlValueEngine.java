@@ -1,8 +1,7 @@
 package com.chineseall.orm.storage;
 
 import com.chineseall.orm.Model;
-import com.chineseall.orm.exception.ActiveRecordException;
-import com.chineseall.orm.exception.OrmNotImplementedException;
+import com.chineseall.orm.exception.FastOrmException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +19,7 @@ public class MysqlValueEngine<T> extends AbstractMysqlEngine<T>{
         this.column = column;
     }
 
-    public List<T> fetchMulti(List<Object[]> keys) throws ActiveRecordException{
+    public List<T> fetchMulti(List<Object[]> keys) throws FastOrmException {
         List<Map<String,Object>> data_dicts = this._fetch_rows_(keys);
         List<T> instances =new ArrayList<T>();
         for (Map<String,Object> data_dict:

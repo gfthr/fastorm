@@ -7,7 +7,7 @@ import java.sql.SQLException;
  * @author stworthy
  *
  */
-public class DataAccessException extends ActiveRecordException {
+public class DataAccessException extends FastOrmException {
     /**
 	 * 
 	 */

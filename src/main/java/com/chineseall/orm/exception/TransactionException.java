@@ -4,7 +4,7 @@ package com.chineseall.orm.exception;
  * 事务操作异常类
  * @author stworthy
  */
-public class TransactionException extends ActiveRecordException {
+public class TransactionException extends FastOrmException {
     /**
 	 * 
 	 */

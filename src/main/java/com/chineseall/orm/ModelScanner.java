@@ -1,18 +1,15 @@
 package com.chineseall.orm;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
+import com.chineseall.orm.annotations.ModelEngineType;
 import com.chineseall.orm.annotations.Table;
 import com.chineseall.orm.storage.CacheEngine;
 import com.chineseall.orm.storage.MysqlObjectEngine;
 import com.chineseall.orm.storage.MysqlValueEngine;
 import com.chineseall.orm.storage.RedisEngine;
-import com.chineseall.orm.annotations.ModelEngineType;
 import org.reflections.Reflections;
+
+import java.lang.reflect.Field;
+import java.util.Set;
 
 public class ModelScanner {
     /**

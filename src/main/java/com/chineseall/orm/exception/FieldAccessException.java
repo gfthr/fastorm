@@ -4,7 +4,7 @@ package com.chineseall.orm.exception;
  * 对象字段访问异常类
  * @author stworthy
  */
-public class FieldAccessException extends ActiveRecordException {
+public class FieldAccessException extends FastOrmException {
     /**
 	 * 
 	 */

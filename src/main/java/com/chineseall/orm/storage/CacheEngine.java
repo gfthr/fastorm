@@ -1,7 +1,7 @@
 package com.chineseall.orm.storage;
 
 import com.chineseall.orm.Model;
-import com.chineseall.orm.exception.ActiveRecordException;
+import com.chineseall.orm.exception.FastOrmException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +46,7 @@ public class CacheEngine<T> extends ModelEngine<T> {
     }
 
 
-    public T fetch(Object[] key, boolean auto_create) throws ActiveRecordException {
+    public T fetch(Object[] key, boolean auto_create) throws FastOrmException {
         String general_key = this.model_class_gen_general_key(key);
         T instance = null;
         // 先从缓存取。这里暂时不考虑 auto_create，如有需要再改这里的逻辑
@@ -83,7 +83,7 @@ public class CacheEngine<T> extends ModelEngine<T> {
     }
 
 
-    public List<T> fetchMulti(List<Object[]> keys) throws ActiveRecordException {
+    public List<T> fetchMulti(List<Object[]> keys) throws FastOrmException {
         List<T> instances = new ArrayList<T>();
 
         // 从缓存取
@@ -143,19 +143,19 @@ public class CacheEngine<T> extends ModelEngine<T> {
         return instances;
     }
 
-    public String to_general_key(Object[] tuple_key) throws ActiveRecordException {
+    public String to_general_key(Object[] tuple_key) throws FastOrmException {
         return this.model_class_gen_general_key(tuple_key);
     }
 
 
-    public boolean has_nonemark(Object[] tuple_key) throws ActiveRecordException {
+    public boolean has_nonemark(Object[] tuple_key) throws FastOrmException {
         return this.nonemark.exists(this.to_general_key(tuple_key));
     }
 
 
-    public void save(Object instance) throws ActiveRecordException {
+    public void save(Object instance) throws FastOrmException {
         if (!(instance instanceof Model)) {
-            throw new ActiveRecordException("instance must be Model");
+            throw new FastOrmException("instance must be Model");
         }
 
         Model model = (Model) instance;
@@ -176,14 +176,14 @@ public class CacheEngine<T> extends ModelEngine<T> {
             this.nonemark.remove(model.general_key());
     }
 
-    public void delete(Object[] key_values) throws ActiveRecordException {
+    public void delete(Object[] key_values) throws FastOrmException {
         if (ng_cache != null)
             this.ng_source.delete(key_values);
         if (ng_cache != null)
             this.ng_cache.delete(key_values);
     }
 
-    public void clear_cache(Object[] key) throws ActiveRecordException {
+    public void clear_cache(Object[] key) throws FastOrmException {
         if (ng_cache != null)
             this.ng_cache.delete(key);
 

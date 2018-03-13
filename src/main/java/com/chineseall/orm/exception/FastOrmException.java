@@ -5,21 +5,21 @@ package com.chineseall.orm.exception;
  * @author stworthy
  *
  */
-public class ActiveRecordException extends Exception{
+public class FastOrmException extends Exception{
     /**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public ActiveRecordException(String s){
+	public FastOrmException(String s){
         super(s);
     }
     
-    public ActiveRecordException(String s, Throwable root){
+    public FastOrmException(String s, Throwable root){
         super(s, root);
     }
     
-    public ActiveRecordException(Throwable root){
+    public FastOrmException(Throwable root){
         super(root);
     }
 }

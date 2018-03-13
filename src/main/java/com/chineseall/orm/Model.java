@@ -1,6 +1,6 @@
 package com.chineseall.orm;
 
-import com.chineseall.orm.exception.ActiveRecordException;
+import com.chineseall.orm.exception.FastOrmException;
 import com.chineseall.orm.field.ColumnField;
 import com.chineseall.orm.field.IdField;
 import com.chineseall.orm.storage.ModelEngine;
@@ -78,7 +78,7 @@ public abstract class Model<T> {
         return String.format("%s%s|%s",Setting.REAL_CACHE_LOCAL_PREFIX, model_engine.getModelClass(),key_str);
     }
 
-    public static<T> T fetch(Object[] key, boolean auto_create) throws ActiveRecordException {
+    public static<T> T fetch(Object[] key, boolean auto_create) throws FastOrmException {
         /*
         根据 key 获取对象，如果 key 为 None 或者 (None,)，返回 None。
         :param auto_create:
@@ -88,13 +88,13 @@ public abstract class Model<T> {
 
         if(key==null || (key!=null&&key.length==0)){
             //不允许传空的 key，如果真有需要再去掉这限制
-            throw new ActiveRecordException("empty key  for fetch");
+            throw new FastOrmException("empty key  for fetch");
         }
 
         ModelMeta meta = ModelMeta.getModelMeta(model_engine.getModelClass());
 
         if(auto_create && !meta.autoCreatable){
-            throw new ActiveRecordException(model_engine.getModelClass().getName()+"  is not auto_creatable");
+            throw new FastOrmException(model_engine.getModelClass().getName()+"  is not auto_creatable");
         }
 
         T instance = (T)model_engine.fetch(key, auto_create);
@@ -106,7 +106,7 @@ public abstract class Model<T> {
         return instance;
     }
 
-    public static <T> List<T> fetchMulti(List<Object[]> keys) throws ActiveRecordException {
+    public static <T> List<T> fetchMulti(List<Object[]> keys) throws FastOrmException {
         /*
         一次性获取多个对象。
         根据 keys 的顺序返回获取的对象，对象获取不到时为 None。
@@ -129,7 +129,7 @@ public abstract class Model<T> {
         return instances;
     }
 
-    public void save() throws ActiveRecordException {
+    public void save() throws FastOrmException {
         if (!this.isModified())
             return;
 
@@ -139,11 +139,11 @@ public abstract class Model<T> {
         this.model_saved = true;
     }
 
-    public void delete() throws ActiveRecordException {
+    public void delete() throws FastOrmException {
         model_engine.delete(this.tuple_key());
     }
 
-    public static <T> T create(Object[] key, Map<?, ?> iniValue) throws ActiveRecordException {
+    public static <T> T create(Object[] key, Map<?, ?> iniValue) throws FastOrmException {
 
         // 1)创建代理类,解决属性变化的监听问题
         ModelProxy proxy = new ModelProxy();
@@ -164,7 +164,7 @@ public abstract class Model<T> {
                     i++;
                 }
             } catch (Exception ex) {
-                throw new ActiveRecordException("create 时 ID与值不匹配:"+ex.getMessage());
+                throw new FastOrmException("create 时 ID与值不匹配:"+ex.getMessage());
             }
         }
 
@@ -187,7 +187,7 @@ public abstract class Model<T> {
                     f.getField().set(obj, ConvertUtil.castFromObject(defaultValue, f.getType()));
                 }
             } catch (IllegalAccessException ex) {
-                throw new ActiveRecordException("IllegalAccessException castFromObject error");
+                throw new FastOrmException("IllegalAccessException castFromObject error");
             }
         }
         return obj;
