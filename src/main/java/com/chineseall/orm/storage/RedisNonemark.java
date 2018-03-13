@@ -1,7 +1,7 @@
 package com.chineseall.orm.storage;
 
-import com.chineseall.orm.RedisClient;
-import com.chineseall.orm.Setting;
+import com.chineseall.orm.utils.RedisClient;
+import com.chineseall.orm.utils.Setting;
 
 import java.util.Random;
 

@@ -2,8 +2,8 @@ package com.chineseall.orm.storage;
 
 import com.alibaba.fastjson.JSON;
 import com.chineseall.orm.Model;
-import com.chineseall.orm.RedisClient;
-import com.chineseall.orm.Setting;
+import com.chineseall.orm.utils.RedisClient;
+import com.chineseall.orm.utils.Setting;
 import com.chineseall.orm.exception.FastOrmException;
 import org.springframework.util.StringUtils;
 

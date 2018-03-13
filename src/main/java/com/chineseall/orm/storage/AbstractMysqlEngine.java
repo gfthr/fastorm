@@ -5,6 +5,8 @@ import com.chineseall.orm.*;
 import com.chineseall.orm.adapters.Adapter;
 import com.chineseall.orm.connections.ConnectionProvider;
 import com.chineseall.orm.exception.FastOrmException;
+import com.chineseall.orm.utils.ConvertUtil;
+import com.chineseall.orm.utils.DbClient;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.util.StringUtils;
 

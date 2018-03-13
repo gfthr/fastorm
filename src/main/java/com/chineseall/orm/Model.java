@@ -4,6 +4,8 @@ import com.chineseall.orm.exception.FastOrmException;
 import com.chineseall.orm.field.ColumnField;
 import com.chineseall.orm.field.IdField;
 import com.chineseall.orm.storage.ModelEngine;
+import com.chineseall.orm.utils.ConvertUtil;
+import com.chineseall.orm.utils.Setting;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -75,7 +77,7 @@ public abstract class Model<T> {
     public static String gen_general_key( Object[] tuple_key){
         //生成 general key，子类可以按需覆盖此方法
         String key_str = StringUtils.arrayToDelimitedString(tuple_key,"|");
-        return String.format("%s%s|%s",Setting.REAL_CACHE_LOCAL_PREFIX, model_engine.getModelClass(),key_str);
+        return String.format("%s%s|%s", Setting.REAL_CACHE_LOCAL_PREFIX, model_engine.getModelClass(),key_str);
     }
 
     public static<T> T fetch(Object[] key, boolean auto_create) throws FastOrmException {

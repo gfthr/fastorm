@@ -1,4 +1,4 @@
-package com.chineseall.orm;
+package com.chineseall.orm.utils;
 
 /**
  * Created by wangqiang on 2018/3/7.

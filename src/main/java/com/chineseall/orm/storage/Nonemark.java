@@ -1,7 +1,7 @@
 package com.chineseall.orm.storage;
 
-import com.chineseall.orm.Setting;
-import com.chineseall.orm.exception.OrmNotImplementedException;
+import com.chineseall.orm.utils.Setting;
+
 /**
  * Created by wangqiang on 2018/3/7.
  */
