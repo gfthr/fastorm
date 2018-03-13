@@ -9,6 +9,8 @@ import com.chineseall.orm.utils.Setting;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.*;
 
 /**
@@ -24,7 +26,9 @@ public abstract class Model<T> {
 
     public ModelEngine getModelEngine(){
         //此处返回null, 通过ModelProxy CGLIB 动态代理修改这个方法的返回值
-        return null;
+        //此处也可以不需要CGLIB
+        Class<T> clazz = getModelClass();
+        return ModelProxy.getModelEngine(clazz);
     }
 
     public void markModified() {
@@ -84,6 +88,22 @@ public abstract class Model<T> {
         return String.format("%s%s|%s", Setting.REAL_CACHE_LOCAL_PREFIX, classz,key_str);
     }
 
+    public Class<T> getModelClass(){
+        Class<T> clazz;
+        //当前对象的直接超类的 Type
+        Type genericSuperclass = getClass().getGenericSuperclass();
+        if(genericSuperclass instanceof ParameterizedType){
+            //参数化类型
+            ParameterizedType parameterizedType= (ParameterizedType) genericSuperclass;
+            //返回表示此类型实际类型参数的 Type 对象的数组
+            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+            clazz= (Class<T>)actualTypeArguments[0];
+        }else{
+            clazz= (Class<T>)genericSuperclass;
+        }
+        return clazz;
+    }
+
     public static<T> T fetch(Class<?> classz, Object[] key, boolean auto_create) throws FastOrmException {
         /*
         根据 key 获取对象，如果 key 为 None 或者 (None,)，返回 None。
@@ -127,7 +147,7 @@ public abstract class Model<T> {
         if(keys==null || (keys!=null && keys.size()<=0)) {
             return instances;
         }
-        instances = (List<T>)ModelProxy.getModelEngine(classz).fetchMulti(keys);
+        instances = ModelProxy.getModelEngine(classz).fetchMulti(keys);
 
         List<T> objs=new ArrayList<T>();
 
@@ -161,7 +181,6 @@ public abstract class Model<T> {
     }
 
     public static <T> T create(Class<?> classz, Object[] key, Map<?, ?> iniValue) throws FastOrmException {
-
         // 1)创建代理类,解决属性变化的监听问题
         ModelProxy proxy = new ModelProxy();
         T obj = (T)proxy.getProxyObject(classz);

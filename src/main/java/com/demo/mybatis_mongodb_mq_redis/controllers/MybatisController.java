@@ -2,6 +2,7 @@ package com.demo.mybatis_mongodb_mq_redis.controllers;
 
 import com.demo.mybatis_mongodb_mq_redis.models.Auto;
 import com.demo.mybatis_mongodb_mq_redis.models.Mybatis;
+import com.demo.mybatis_mongodb_mq_redis.models.Other;
 import com.demo.mybatis_mongodb_mq_redis.models.User;
 import com.demo.mybatis_mongodb_mq_redis.services.IMybatisService;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -62,6 +63,21 @@ public class MybatisController {
             ex.printStackTrace();
         }
         return auto;
+    }
+
+    @RequestMapping("/other")
+    public Other other()
+    {
+        Other other = null;
+        try {
+            other = Other.create(Other.class, null,null);
+            other.setDesc("good");
+            other.save();
+            System.out.print("Other "+other.getId());
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+        return other;
     }
 
 
