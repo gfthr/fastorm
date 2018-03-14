@@ -85,7 +85,7 @@ public abstract class Model<T> {
     public static String gen_general_key(Class<?> classz,  Object[] tuple_key){
         //生成 general key，子类可以按需覆盖此方法
         String key_str = StringUtils.arrayToDelimitedString(tuple_key,"|");
-        return String.format("%s%s|%s", Setting.REAL_CACHE_LOCAL_PREFIX, classz,key_str);
+        return String.format("%s%s|%s", Setting.REAL_CACHE_LOCAL_PREFIX, classz.getName(),key_str);
     }
 
     public Class<T> getModelClass(){

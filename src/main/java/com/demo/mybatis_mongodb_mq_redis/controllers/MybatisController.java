@@ -40,7 +40,7 @@ public class MybatisController {
     @RequestMapping("/get")
     public User get()
     {
-        User user= null;
+        User user= new User();
         try {
             user= User.fetch(User.class, new Object[]{12,2},false);
 
