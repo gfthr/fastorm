@@ -3,9 +3,9 @@ package com.chineseall.orm;
 import com.chineseall.orm.exception.FastOrmException;
 import com.chineseall.orm.field.ColumnField;
 import com.chineseall.orm.field.IdField;
-import com.chineseall.orm.proxy.BaseTypeProxy;
-import com.chineseall.orm.proxy.ListProxy;
-import com.chineseall.orm.proxy.MapProxy;
+import com.chineseall.orm.proxy.BaseTypeHandler;
+import com.chineseall.orm.proxy.ListHandler;
+import com.chineseall.orm.proxy.MapHandler;
 import com.chineseall.orm.storage.ModelEngine;
 import com.chineseall.orm.utils.ConvertUtil;
 import com.chineseall.orm.utils.Setting;
@@ -46,8 +46,8 @@ public abstract class Model<T> {
             for (String name :modified_attrs
                     ) {
                 Object obj = ModelMeta.getFieldValue(getModelEngine().getModelClass(),name,this);
-                if(obj instanceof BaseTypeProxy){
-                    ((BaseTypeProxy) obj).markFlushed();
+                if(obj instanceof BaseTypeHandler){
+                    ((BaseTypeHandler) obj).markFlushed();
                 }
             }
         }catch (Exception e){
@@ -235,13 +235,13 @@ public abstract class Model<T> {
                     //此处代理 对 List 和 Map 生成动态代理监控变化
                     if (castValue != null) {
                         if(castValue instanceof List){
-                            ListProxy listProxy =new ListProxy(castValue,obj ,f.getName());
+                            ListHandler listHandler =new ListHandler(castValue,obj ,f.getName());
                             //创建代理类对象,newProxyInstance返回一个实现List接口的代理类对象
-                            List _proxy = (List) java.lang.reflect.Proxy.newProxyInstance(ClassLoader.getSystemClassLoader(), new Class[]{List.class}, listProxy);
+                            List _proxy = (List) java.lang.reflect.Proxy.newProxyInstance(ClassLoader.getSystemClassLoader(), new Class[]{List.class}, listHandler);
                             castValue = _proxy;
                         }else if(castValue instanceof Map){
-                            MapProxy mapProxy =new MapProxy(castValue,obj ,f.getName());
-                            Map _proxy = (Map) java.lang.reflect.Proxy.newProxyInstance(ClassLoader.getSystemClassLoader(), new Class[]{Map.class}, mapProxy);
+                            MapHandler mapHandler =new MapHandler(castValue,obj ,f.getName());
+                            Map _proxy = (Map) java.lang.reflect.Proxy.newProxyInstance(ClassLoader.getSystemClassLoader(), new Class[]{Map.class}, mapHandler);
                             castValue= _proxy;
                         }
                     }

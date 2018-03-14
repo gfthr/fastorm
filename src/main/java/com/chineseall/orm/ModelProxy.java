@@ -1,8 +1,8 @@
 package com.chineseall.orm;
 
 import com.chineseall.orm.exception.FastOrmException;
-import com.chineseall.orm.proxy.ListProxy;
-import com.chineseall.orm.proxy.MapProxy;
+import com.chineseall.orm.proxy.ListHandler;
+import com.chineseall.orm.proxy.MapHandler;
 import com.chineseall.orm.storage.ModelEngine;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
@@ -88,13 +88,13 @@ public class ModelProxy implements MethodInterceptor{
         if(isEnchanceListorMap){
             String key = ModelMeta.getFieldName(method.getName());
             if(args[0] instanceof List){
-                ListProxy listProxy =new ListProxy(args[0],obj ,key);
+                ListHandler listHandler =new ListHandler(args[0],obj ,key);
                 //创建代理类对象,newProxyInstance返回一个实现List接口的代理类对象
-                List _proxy = (List) java.lang.reflect.Proxy.newProxyInstance(ClassLoader.getSystemClassLoader(), new Class[]{List.class}, listProxy);
+                List _proxy = (List) java.lang.reflect.Proxy.newProxyInstance(ClassLoader.getSystemClassLoader(), new Class[]{List.class}, listHandler);
                 newargs[0] = _proxy;
             }else if(args[0] instanceof Map){
-                MapProxy mapProxy =new MapProxy(args[0],obj ,key);
-                Map _proxy = (Map) java.lang.reflect.Proxy.newProxyInstance(ClassLoader.getSystemClassLoader(), new Class[]{Map.class}, mapProxy);
+                MapHandler mapHandler =new MapHandler(args[0],obj ,key);
+                Map _proxy = (Map) java.lang.reflect.Proxy.newProxyInstance(ClassLoader.getSystemClassLoader(), new Class[]{Map.class}, mapHandler);
                 newargs[0] = _proxy;
             }
         }
