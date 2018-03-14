@@ -90,8 +90,7 @@ public class MybatisController {
             keys.add(new Object[]{1});
             keys.add(new Object[]{2});
             keys.add(new Object[]{3});
-            Other other =new Other();
-            others = other.fetchMulti(keys);
+            others =new Other().fetchMulti(keys);
         }catch (Exception ex){
             ex.printStackTrace();
         }
