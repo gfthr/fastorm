@@ -28,7 +28,7 @@ public class MybatisController {
             Map<String, Object> iniValue=new HashMap<String, Object>();
             iniValue.put("name", "name1");
             iniValue.put("addr", "addr1");
-            User user = User.create(User.class, new Object[]{13,2}, iniValue);
+            User user = new User().create(new Object[]{13,2}, iniValue);
             user.save();
         }catch (Exception ex){
             ex.printStackTrace();
@@ -42,7 +42,7 @@ public class MybatisController {
     {
         User user= new User();
         try {
-            user= User.fetch(User.class, new Object[]{12,2},false);
+            user= user.fetch(new Object[]{12,2},false);
 
         }catch (Exception ex){
             ex.printStackTrace();
@@ -54,9 +54,9 @@ public class MybatisController {
     @RequestMapping("/auto")
     public Auto auto()
     {
-        Auto auto = null;
+        Auto auto = new Auto();
         try {
-            auto = Auto.create(Auto.class, null,null);
+            auto = auto.create(null,null);
             auto.setName("good");
             auto.save();
             System.out.print("Auto "+auto.getId());
@@ -69,9 +69,9 @@ public class MybatisController {
     @RequestMapping("/other")
     public Other other()
     {
-        Other other = null;
+        Other other = new Other();
         try {
-            other = Other.create(Other.class, null,null);
+            other = other.create(null,null);
             other.setDesc("good");
             other.save();
             System.out.print("Other "+other.getId());
@@ -90,7 +90,8 @@ public class MybatisController {
             keys.add(new Object[]{1});
             keys.add(new Object[]{2});
             keys.add(new Object[]{3});
-            others = Other.fetchMulti(Other.class,keys );
+            Other other =new Other();
+            others = other.fetchMulti(keys);
         }catch (Exception ex){
             ex.printStackTrace();
         }

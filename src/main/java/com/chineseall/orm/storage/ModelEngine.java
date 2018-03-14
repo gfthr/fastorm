@@ -22,8 +22,12 @@ public abstract class ModelEngine<T> {
     }
 
     public Object model_class_create(Object[] key, Object result_data) throws FastOrmException {
-
-        return this.model_class_invoke_method(null, "create", new Class[]{Class.class, key.getClass(), Map.class}, new Object[]{this.model_class, key, result_data});
+        try {
+            Object obj = this.model_class.newInstance();
+            return this.model_class_invoke_method(obj, "create", new Class[]{Class.class, key.getClass(), Map.class}, new Object[]{this.model_class, key, result_data});
+        }catch (Exception e){
+            throw new FastOrmException("model_class_create error");
+        }
     }
 
     public String model_class_gen_general_key(Object[] tuple_key) throws FastOrmException {

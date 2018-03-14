@@ -79,10 +79,10 @@ public abstract class Model<T> {
     }
 
     public String general_key() {
-        return gen_general_key(getModelEngine().getModelClass(), this.tuple_key()) ;
+        return gen_general_key(this.getModelClass(), this.tuple_key()) ;
     }
 
-    public static String gen_general_key(Class<?> classz,  Object[] tuple_key){
+    public String gen_general_key(Class<?> classz,  Object[] tuple_key){
         //生成 general key，子类可以按需覆盖此方法
         String key_str = StringUtils.arrayToDelimitedString(tuple_key,"|");
         return String.format("%s%s|%s", Setting.REAL_CACHE_LOCAL_PREFIX, classz.getName(),key_str);
@@ -104,14 +104,14 @@ public abstract class Model<T> {
         return clazz;
     }
 
-    public static<T> T fetch(Class<?> classz, Object[] key, boolean auto_create) throws FastOrmException {
+    public T fetch(Object[] key, boolean auto_create) throws FastOrmException {
         /*
         根据 key 获取对象，如果 key 为 None 或者 (None,)，返回 None。
         :param auto_create:
         在获取不到对象时是否根据 key 新建一个（当 auto_creatable=True 时）
         :rtype: Model
         */
-
+        Class<T> classz = this.getModelClass();
         if(key==null || (key!=null&&key.length==0)){
             //不允许传空的 key，如果真有需要再去掉这限制
             throw new FastOrmException("empty key  for fetch");
@@ -132,7 +132,7 @@ public abstract class Model<T> {
         return instance;
     }
 
-    public static <T> List<T> fetchMulti(Class<?> classz, List<Object[]> keys) throws FastOrmException {
+    public List<T> fetchMulti(List<Object[]> keys) throws FastOrmException {
         /*
         一次性获取多个对象。
         根据 keys 的顺序返回获取的对象，对象获取不到时为 None。
@@ -140,6 +140,7 @@ public abstract class Model<T> {
         :return: list[instance]
         :rtype: list[Model]
         */
+        Class<T> classz = this.getModelClass();
         List<T> instances=new ArrayList<T>();
         if(keys==null || (keys!=null && keys.size()<=0)) {
             return instances;
@@ -170,7 +171,8 @@ public abstract class Model<T> {
         getModelEngine().delete(this.tuple_key());
     }
 
-    public static <T> T create(Class<?> classz, Object[] key, Map<?, ?> iniValue) throws FastOrmException {
+    public T create(Object[] key, Map<?, ?> iniValue) throws FastOrmException {
+        Class<T> classz = this.getModelClass();
         // 1)创建代理类,解决属性变化的监听问题
         ModelProxy proxy = new ModelProxy();
         T obj = (T)proxy.getProxyObject(classz);
@@ -228,10 +230,10 @@ public abstract class Model<T> {
         //指定属性导出成原始类型或 dict、list。
         Map<String,Object> result_dict = new HashMap<String,Object>();
         try {
-            ModelMeta meta = ModelMeta.getModelMeta(getModelEngine().getModelClass());
+            ModelMeta meta = ModelMeta.getModelMeta(this.getModelClass());
             for (String attr:
                     attrs) {
-                result_dict.put(attr,meta.getFieldValue(getModelEngine().getModelClass(),attr,this));
+                result_dict.put(attr,meta.getFieldValue(this.getModelClass(),attr,this));
             }
         }catch (Exception e){
             e.printStackTrace();

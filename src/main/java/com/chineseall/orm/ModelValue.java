@@ -19,12 +19,13 @@ public class ModelValue<T> extends Model<T> {
         return this.dump(meta.get_column_names());
     }
 
-    public static<T> T create(Class<?> classz, Object[] key, Object value) throws FastOrmException {
+    public T create(Object[] key, Object value) throws FastOrmException {
+        Class<T> classz= getModelClass();
         ModelMeta meta = ModelMeta.getModelMeta(classz);
         String valueColumnName = meta.get_column_names()[0];
         Map<String,Object> datadict= new HashMap<String,Object>();
         datadict.put(valueColumnName,value);
-        return Model.create(classz, key,datadict);
+        return super.create(key,datadict);
 
     }
 }
