@@ -376,7 +376,7 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
 
             String[] sql_set =new String[column_names.length];
             for (int i=0;i<column_names.length;i++){
-                sql_set[i] =  "`"+column_names[i]+"`=%s";
+                sql_set[i] =  "`"+column_names[i]+"`=?";
             }
             String str_sql_set = StringUtils.arrayToDelimitedString(sql_set,",");
             // UPDATE `table` SET `column1`=%s,`column2`=%s

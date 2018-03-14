@@ -81,6 +81,21 @@ public class MybatisController {
         return other;
     }
 
+    @RequestMapping("/otheredit")
+    public Other otherEdit()
+    {
+        Other other = null;
+        try {
+            other = Other.fetch(Other.class,  new Object[]{3}, false);
+            other.setDesc("good-otheredit:"+ System.currentTimeMillis());
+            other.save();
+            System.out.print("Other "+other.getId());
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+        return other;
+    }
+
     @RequestMapping("/othermulti")
     public List<Other>otherMulti()
     {

@@ -64,10 +64,12 @@ public class ModelProxy implements MethodInterceptor{
                 if(oldFieldValue!=null && !oldFieldValue.equals(newFieldValue)){
                     if(obj instanceof Model){
                         ((Model) obj).getModified_attrs().add(fieldName);
+                        ((Model) obj).markModified();
                     }
                 }else if(oldFieldValue==null && newFieldValue!=null){
                     if(obj instanceof Model){
                         ((Model) obj).getModified_attrs().add(fieldName);
+                        ((Model) obj).markModified();
                     }
                 }
                 System.out.print(">>>>:"+method.getName());
