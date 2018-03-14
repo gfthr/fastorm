@@ -1,5 +1,6 @@
 package com.chineseall.orm.utils;
 
+import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,6 +22,11 @@ public class ConvertUtil {
 
     public Converter lookup(Class<?> clasz){
         return converters.get(clasz);
+    }
+
+    static {
+        register(new MapConverter(), Map.class);
+        register(new ListConverter(), List.class);
     }
 
     public static Object castFromObject(Object obj, Class<?> destType){

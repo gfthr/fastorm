@@ -74,6 +74,15 @@ public class MybatisController {
         try {
             other = Other.create(Other.class, null,null);
             other.setDesc("good:add" + System.currentTimeMillis());
+            other.setName("name1");
+            List<String> list =new ArrayList<>();
+            list.add("list1");
+            list.add("list2");
+            other.setConfig(list);
+            Map<String,Object> map =new HashMap<>();
+            map.put("key1","key1value");
+            map.put("key2","key2value");
+            other.setMap(map);
             other.save();
             System.out.print("Other "+other.getId());
         }catch (Exception ex){
@@ -87,8 +96,9 @@ public class MybatisController {
     {
         Other other = null;
         try {
-            other = Other.fetch(Other.class,  new Object[]{3}, false);
+            other = Other.fetch(Other.class,  new Object[]{5}, false);
             other.setDesc("good-otheredit:"+ System.currentTimeMillis());
+            other.getConfig().add("test3");
             other.save();
             System.out.print("Other "+other.getId());
         }catch (Exception ex){

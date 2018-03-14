@@ -3,6 +3,9 @@ package com.chineseall.orm;
 import com.chineseall.orm.exception.FastOrmException;
 import com.chineseall.orm.field.ColumnField;
 import com.chineseall.orm.field.IdField;
+import com.chineseall.orm.proxy.BaseTypeProxy;
+import com.chineseall.orm.proxy.ListProxy;
+import com.chineseall.orm.proxy.MapProxy;
 import com.chineseall.orm.storage.ModelEngine;
 import com.chineseall.orm.utils.ConvertUtil;
 import com.chineseall.orm.utils.Setting;
@@ -39,6 +42,17 @@ public abstract class Model<T> {
 
     public void markFlushed() {
         this.modified = false;
+        try {
+            for (String name :modified_attrs
+                    ) {
+                Object obj = ModelMeta.getFieldValue(getModelEngine().getModelClass(),name,this);
+                if(obj instanceof BaseTypeProxy){
+                    ((BaseTypeProxy) obj).markFlushed();
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         modified_attrs.clear();
     }
 
@@ -52,6 +66,11 @@ public abstract class Model<T> {
 
     public Set<String> getModified_attrs() {
         return modified_attrs;
+    }
+
+    public void addChildModified(String key){
+        markModified();
+        modified_attrs.add(key);
     }
 
     /**
@@ -212,7 +231,21 @@ public abstract class Model<T> {
                     if (defaultValue == null)
                         continue;
                     f.getField().setAccessible(true);
-                    f.getField().set(obj, ConvertUtil.castFromObject(defaultValue, f.getType()));
+                    Object castValue =ConvertUtil.castFromObject(defaultValue, f.getType());
+                    //此处代理 对 List 和 Map 生成动态代理监控变化
+                    if (castValue != null) {
+                        if(castValue instanceof List){
+                            ListProxy listProxy =new ListProxy(castValue,obj ,f.getName());
+                            //创建代理类对象,newProxyInstance返回一个实现List接口的代理类对象
+                            List _proxy = (List) java.lang.reflect.Proxy.newProxyInstance(ClassLoader.getSystemClassLoader(), new Class[]{List.class}, listProxy);
+                            castValue = _proxy;
+                        }else if(castValue instanceof Map){
+                            MapProxy mapProxy =new MapProxy(castValue,obj ,f.getName());
+                            Map _proxy = (Map) java.lang.reflect.Proxy.newProxyInstance(ClassLoader.getSystemClassLoader(), new Class[]{Map.class}, mapProxy);
+                            castValue= _proxy;
+                        }
+                    }
+                    f.getField().set(obj, castValue);
                 }
             } catch (IllegalAccessException ex) {
                 throw new FastOrmException("IllegalAccessException castFromObject error");

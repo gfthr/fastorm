@@ -1,6 +1,8 @@
 package com.chineseall.orm;
 
 import com.chineseall.orm.exception.FastOrmException;
+import com.chineseall.orm.proxy.ListProxy;
+import com.chineseall.orm.proxy.MapProxy;
 import com.chineseall.orm.storage.ModelEngine;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
@@ -8,6 +10,7 @@ import net.sf.cglib.proxy.MethodProxy;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ModelProxy implements MethodInterceptor{
@@ -45,6 +48,7 @@ public class ModelProxy implements MethodInterceptor{
     }
     
     public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable{
+        boolean isEnchanceListorMap =false;
         Class<?> clasz = obj.getClass().getSuperclass();
         if (target != null){
             obj = target;
@@ -73,14 +77,33 @@ public class ModelProxy implements MethodInterceptor{
                     }
                 }
                 System.out.print(">>>>:"+method.getName());
+                //这里可以处理一下 list 和 map 给他们加上感知变化功能
+                if(args!=null && args.length==1 && (args[0] instanceof List ||args[0] instanceof Map )){
+                    isEnchanceListorMap = true;
+                }
+            }
+        }
+
+        Object[] newargs = args;
+        if(isEnchanceListorMap){
+            String key = ModelMeta.getFieldName(method.getName());
+            if(args[0] instanceof List){
+                ListProxy listProxy =new ListProxy(args[0],obj ,key);
+                //创建代理类对象,newProxyInstance返回一个实现List接口的代理类对象
+                List _proxy = (List) java.lang.reflect.Proxy.newProxyInstance(ClassLoader.getSystemClassLoader(), new Class[]{List.class}, listProxy);
+                newargs[0] = _proxy;
+            }else if(args[0] instanceof Map){
+                MapProxy mapProxy =new MapProxy(args[0],obj ,key);
+                Map _proxy = (Map) java.lang.reflect.Proxy.newProxyInstance(ClassLoader.getSystemClassLoader(), new Class[]{Map.class}, mapProxy);
+                newargs[0] = _proxy;
             }
         }
         
         if (target == null){
-            return proxy.invokeSuper(obj, args);
+            return proxy.invokeSuper(obj, newargs);
         }
         else{
-            return proxy.invoke(target, args);
+            return proxy.invoke(target, newargs);
         }
 //        Object result = proxy.invokeSuper(obj, args);
 //        return result;

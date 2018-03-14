@@ -40,10 +40,10 @@ public class MysqlObjectEngine<T> extends AbstractMysqlEngine<T>{
 
     protected Object[] _get_columns_for_update_(Model model){
         String[] attr_names = new String[model.getModified_attrs().size()];
-        for (int i = 0; i < model.getModified_attrs().size(); i++) {
-            attr_names[i]=(String)model.getModified_attrs().iterator().next();
+        Object[] obj_attr_names =model.getModified_attrs().toArray();
+        for (int i = 0; i < obj_attr_names.length; i++) {
+            attr_names[i]=(String)obj_attr_names[i];
         }
-
         Object[] attr_values = this.__dump_values(model, attr_names);
         return new Object[]{attr_names,attr_values};
     }
