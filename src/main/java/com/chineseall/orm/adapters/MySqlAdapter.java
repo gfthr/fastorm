@@ -19,7 +19,7 @@ public class MySqlAdapter extends Adapter {
     }
     
     public String getIdentitySelectString(){
-        return "select last_insert_id()";
+        return "query last_insert_id()";
     }
     
     public String getSequenceNextValString(String sequenceName){

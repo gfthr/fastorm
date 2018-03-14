@@ -1,17 +1,16 @@
 package com.chineseall.orm.storage;
 
 import com.alibaba.fastjson.JSON;
-import com.chineseall.orm.*;
-import com.chineseall.orm.adapters.Adapter;
-import com.chineseall.orm.connections.ConnectionProvider;
+import com.chineseall.orm.Model;
+import com.chineseall.orm.ModelMeta;
 import com.chineseall.orm.exception.FastOrmException;
+import com.chineseall.orm.utils.ConnectionsManager;
 import com.chineseall.orm.utils.ConvertUtil;
 import com.chineseall.orm.utils.DbClient;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,10 +24,7 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
     protected String view;
     protected String delete_mark;
 
-    //连接提供者
-    private static Map<String,ConnectionProvider> connections = new HashMap<String,ConnectionProvider>();
-    //数据库适配器（方言）
-    private static Map<String,Adapter> adapters = new HashMap<String,Adapter>();
+
 
     public AbstractMysqlEngine(Class<T> model_class, String table, String delete_mark, String view){
         super(model_class);
@@ -39,69 +35,7 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
         this.delete_mark = delete_mark;
         this.view = view;
         ModelMeta meta = ModelMeta.getModelMeta(this.model_class);
-        dbClient =new DbClient(connections.get(meta.db));
-    }
-
-    static {
-        try{
-            DatabaseConfReader reader = new DatabaseConfReader();
-            reader.init();
-            connections = reader.getConnections();
-            adapters = reader.getAdapters();
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * 取得数据库连接提供者
-     * @param c 指定的数据库连接所绑定的类class
-     * @return 连接提供者
-     */
-    public static ConnectionProvider getConnectionProvider(Class<?> c) {
-        return connections.get(getBaseClassName(c));
-    }
-
-    /**
-     * 设置数据库连接提供者
-     * @param dbName 域基类，由它登记数据库连接信息
-     * @param cp 连接提供者
-     */
-    public static void putConnectionProvider(String dbName, ConnectionProvider cp){
-        connections.put(dbName, cp);
-    }
-
-    /**
-     * 取得数据库适配器
-     * @param c 指定的数据库连接所绑定的类class
-     * @return 数据库适配器
-     */
-    public static Adapter getConnectionAdapter(Class<?> c){
-        return adapters.get(getBaseClassName(c));
-    }
-
-    /**
-     * 设置连接适配器
-     * @param domainClassName 域基类，由它登记数据库连接信息
-     * @param adapter 适配器
-     */
-    public static void putConnectionAdapter(String domainClassName, Adapter adapter){
-        adapters.put(domainClassName, adapter);
-    }
-
-    private static String getBaseClassName(Class<?> c){
-        String className = c.getCanonicalName();
-        ConnectionProvider cp = connections.get(className);
-        while (cp == null){
-            c = c.getSuperclass();
-            if (c == null) {
-                return null;
-            }
-            className = c.getCanonicalName();
-            cp = connections.get(className);
-        }
-        return className;
+        dbClient =new DbClient(ConnectionsManager.getConnections().get(meta.db));
     }
 
     protected String _sql_table(){
@@ -200,9 +134,9 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
         List<Map<String,Object>> rows = null;
 
         if(!StringUtils.isEmpty(this.table)){
-            rows = dbClient.select(this._sql_select(), key,0,0);
+            rows = dbClient.query(this._sql_select(), key,0,0);
         }else if (!StringUtils.isEmpty(this.view)){
-            rows = dbClient.select(this.view, key,0,0);
+            rows = dbClient.query(this.view, key,0,0);
         }
 
         Map<String,Object> result_dict =null;
@@ -310,7 +244,7 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
             for (Object key :tuple_keys){
                 Object[] tuple_key=(Object[])key;
                 List<Map<String,Object>> _rows = null;
-                _rows = dbClient.select(this._sql_select(), tuple_key,0,0);
+                _rows = dbClient.query(this._sql_select(), tuple_key,0,0);
                 if(_rows.size()>1){
                     throw new FastOrmException("Multiple rows returned for fetch() query");
                 }
@@ -332,7 +266,7 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
             }
             String sql_in = StringUtils.arrayToDelimitedString(sql_in_array,",");
             String sql = String.format(this._sql_multi_select_by_in(),sql_in);
-            rows = dbClient.select(sql, sql_params,0,0);
+            rows = dbClient.query(sql, sql_params,0,0);
         }else{
             Object[] sql_params = new Object[count*key_columns.length];
             for (int i=0;i<tuple_keys.size();i++) {
@@ -341,7 +275,7 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
                 }
             }
             String sql = this._gen_sql_multi_select_by_union(count);
-            rows = dbClient.select(sql, sql_params,0,0);
+            rows = dbClient.query(sql, sql_params,0,0);
         }
         // 将 rows 按 tuple_keys 排序
 //        extract_key = lambda row: tuple(row[name] for name in identifier)

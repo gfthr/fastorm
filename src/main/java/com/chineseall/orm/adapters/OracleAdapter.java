@@ -8,12 +8,12 @@ public class OracleAdapter extends Adapter {
     public String getLimitString(String sql, int limit, int offset){
         StringBuffer pagingSelect = new StringBuffer(sql.length()+100);
         if (offset == 0){
-            pagingSelect.append("select * from ( ");
+            pagingSelect.append("query * from ( ");
             pagingSelect.append(sql);
             pagingSelect.append(" ) where rownum <= " + Integer.toString(limit));
         }
         else{
-            pagingSelect.append("select * from ( select row_.*, rownum rownum_ from ( ");
+            pagingSelect.append("query * from ( query row_.*, rownum rownum_ from ( ");
             pagingSelect.append(sql);
             pagingSelect.append(" ) row_ ) where rownum_ <= "+Integer.toString(limit+offset)+" and rownum_ > "+Integer.toString(offset));
         }
@@ -29,6 +29,6 @@ public class OracleAdapter extends Adapter {
     }
     
     public String getSequenceNextValString(String sequenceName){
-        return "select " + sequenceName + ".nextval from dual";
+        return "query " + sequenceName + ".nextval from dual";
     }
 }

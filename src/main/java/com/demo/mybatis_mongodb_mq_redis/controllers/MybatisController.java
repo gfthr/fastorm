@@ -1,5 +1,6 @@
 package com.demo.mybatis_mongodb_mq_redis.controllers;
 
+import com.chineseall.orm.utils.DbClient;
 import com.demo.mybatis_mongodb_mq_redis.models.Auto;
 import com.demo.mybatis_mongodb_mq_redis.models.Mybatis;
 import com.demo.mybatis_mongodb_mq_redis.models.Other;
@@ -72,7 +73,7 @@ public class MybatisController {
         Other other = null;
         try {
             other = Other.create(Other.class, null,null);
-            other.setDesc("good");
+            other.setDesc("good:add" + System.currentTimeMillis());
             other.save();
             System.out.print("Other "+other.getId());
         }catch (Exception ex){
@@ -90,6 +91,28 @@ public class MybatisController {
             other.setDesc("good-otheredit:"+ System.currentTimeMillis());
             other.save();
             System.out.print("Other "+other.getId());
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+        return other;
+    }
+
+    @RequestMapping("/otherdelete")
+    public Other otherDelete()
+    {
+        Other other = null;
+        try {
+            DbClient dbClient=new DbClient("testdb2");
+            List<Map<String,Object>> result = dbClient.query("select id from other order by id asc",null,1,0);
+            if(result!=null && result.size()>0){
+                int delete_id=(Integer)result.get(0).get("id");
+                if(delete_id>0){
+                    other = Other.fetch(Other.class,  new Object[]{delete_id}, false);
+                    other.delete();
+                    System.out.print("Other "+other.getId());
+                }
+            }
+
         }catch (Exception ex){
             ex.printStackTrace();
         }

@@ -2,7 +2,7 @@ package com.chineseall.orm;
 
 import com.chineseall.orm.adapters.Adapter;
 import com.chineseall.orm.connections.DataSourceConnectionProvider;
-import com.chineseall.orm.storage.AbstractMysqlEngine;
+import com.chineseall.orm.utils.ConnectionsManager;
 
 import javax.sql.DataSource;
 
@@ -41,13 +41,13 @@ public class FastOrmConnectionFactoryBean {
     private void init(){
         if (dbName != null && dataSource != null){
             DataSourceConnectionProvider cp = new DataSourceConnectionProvider(dataSource);
-            AbstractMysqlEngine.putConnectionProvider(dbName, cp);
+            ConnectionsManager.putConnectionProvider(dbName, cp);
 //            ActiveRecordBase.connections.put(domainBaseClass, cp);
         }
         if (dbName != null && adapterClass != null){
             try{
                 Adapter adapter = (Adapter)Class.forName(adapterClass).newInstance();
-                AbstractMysqlEngine.putConnectionAdapter(dbName, adapter);
+                ConnectionsManager.putConnectionAdapter(dbName, adapter);
 //                ActiveRecordBase.adapters.put(domainBaseClass, (Adapter)Class.forName(adapterClass).newInstance());
             }
             catch(Exception e){

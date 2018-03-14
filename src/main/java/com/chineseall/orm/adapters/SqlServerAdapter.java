@@ -6,11 +6,11 @@ public class SqlServerAdapter extends Adapter {
     }
 
     public String getLimitString(String sql, int limit, int offset){
-        if (sql.toLowerCase().startsWith("select distinct")){
-            return "select distinct top " + Integer.toString(limit+offset) + sql.substring("select distinct".length());
+        if (sql.toLowerCase().startsWith("query distinct")){
+            return "query distinct top " + Integer.toString(limit+offset) + sql.substring("query distinct".length());
         }
         else{
-            return "select top " + Integer.toString(limit+offset) + sql.substring("select".length());
+            return "query top " + Integer.toString(limit+offset) + sql.substring("query".length());
         }
     }
     
@@ -20,7 +20,7 @@ public class SqlServerAdapter extends Adapter {
     
     public String getIdentitySelectString(){
         return "SELECT @@IDENTITY";
-//        return "select scope_identity()";
+//        return "query scope_identity()";
     }
     
     public String getSequenceNextValString(String sequenceName){

@@ -19,7 +19,7 @@ public class SqliteAdapter extends Adapter {
     }
     
     public String getIdentitySelectString(){
-        return "select last_insert_rowid()";
+        return "query last_insert_rowid()";
     }
     
     public String getSequenceNextValString(String sequenceName){
