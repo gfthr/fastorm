@@ -20,9 +20,9 @@ public class DbClient {
         this.cp = cp;
     }
 
-    public DbClient(ConnectionProvider cp){
-        this.cp = cp;
-    }
+//    public DbClient(ConnectionProvider cp){
+//        this.cp = cp;
+////    }
 
     public List<Map<String,Object>> query(String sql, Object[] args, int limit, int offset) throws DataAccessException{
         List<Map<String,Object>> data = new ArrayList<Map<String,Object>>();

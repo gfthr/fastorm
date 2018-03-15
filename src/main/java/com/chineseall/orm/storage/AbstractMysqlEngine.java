@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.chineseall.orm.Model;
 import com.chineseall.orm.ModelMeta;
 import com.chineseall.orm.exception.FastOrmException;
-import com.chineseall.orm.utils.ConnectionsManager;
 import com.chineseall.orm.utils.ConvertUtil;
 import com.chineseall.orm.utils.DbClient;
 import org.apache.commons.lang3.ArrayUtils;
@@ -35,7 +34,7 @@ public abstract class AbstractMysqlEngine<T> extends ModelEngine<T>{
         this.delete_mark = delete_mark;
         this.view = view;
         ModelMeta meta = ModelMeta.getModelMeta(this.model_class);
-        dbClient =new DbClient(ConnectionsManager.getConnections().get(meta.db));
+        dbClient =new DbClient(meta.db);
     }
 
     protected String _sql_table(){
