@@ -2,6 +2,7 @@ package com.chineseall.orm.utils;
 
 import com.chineseall.orm.connections.ConnectionProvider;
 import com.chineseall.orm.exception.DataAccessException;
+import com.chineseall.orm.exception.TransactionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -12,17 +13,135 @@ import java.util.List;
 import java.util.Map;
 
 public class DbClient {
+    //当前线程事务（多数据库）
+    private static ThreadLocal<Map<String,Transaction>> currentTransactions = new ThreadLocal<Map<String,Transaction>>();
 	private static Log log = LogFactory.getLog("DbClient");
     private ConnectionProvider cp;
+    private String dbName;
 
     public DbClient(String dbName){
         ConnectionProvider cp =  ConnectionsManager.getConnections().get(dbName);
         this.cp = cp;
+        this.dbName = dbName;
     }
 
-//    public DbClient(ConnectionProvider cp){
-//        this.cp = cp;
-////    }
+
+    /**
+     * 开始一个事务
+     * @throws TransactionException
+     */
+    public void beginTransaction() throws TransactionException{
+        Map<String,Transaction> map = currentTransactions.get();
+        try{
+            if (map == null){
+                Connection con = cp.getConnection();
+                Transaction transaction = new Transaction(con);
+                transaction.beginTransaction();
+
+                map = new HashMap<String,Transaction>();
+                map.put(dbName, transaction);    //将当前事务保存起来
+
+                currentTransactions.set(map);
+            }
+            else{
+                Transaction transaction = map.get(dbName);
+                if (transaction == null){
+                    Connection con = cp.getConnection();
+                    transaction = new Transaction(con);
+                    transaction.beginTransaction();
+
+                    map.put(dbName, transaction);    //将当前事务保存起来
+                }
+                else{
+                    transaction.beginTransaction();     //增加事务级别
+                }
+            }
+        }
+        catch(SQLException e){
+            throw new TransactionException(e);
+        }
+    }
+
+    /**
+     * 提交事务
+     * @throws TransactionException
+     */
+    public  void commit() throws TransactionException{
+        Map<String,Transaction> map = currentTransactions.get();
+        Transaction transaction = map.get(dbName);
+        transaction.commit();
+        if (transaction.isFinished()){  //事务最终完成
+            map.remove(dbName);
+        }
+
+        if (map.size() == 0){
+            currentTransactions.remove();
+        }
+    }
+
+    /**
+     * 回滚事务
+     * @throws TransactionException
+     */
+    public void rollback() throws TransactionException{
+        Map<String,Transaction> map = currentTransactions.get();
+        Transaction transaction = map.get(dbName);
+        transaction.rollback();
+        if (transaction.isFinished()){
+            map.remove(dbName);
+        }
+
+        if (map.size() == 0){
+            currentTransactions.remove();
+        }
+    }
+
+    /**
+     * 获取当前线程事务
+     * @return 当前事务
+     */
+    public Transaction getCurrentTransaction(){
+        Map<String,Transaction> map = currentTransactions.get();
+        if (map == null){
+            return null;
+        }
+        else{
+            return map.get(dbName);
+        }
+    }
+
+
+    public Connection getConnection() throws DataAccessException {
+        Connection con;
+        Transaction transaction = getCurrentTransaction();
+
+        try{
+            if (transaction == null){
+                con = cp.getConnection();
+            }
+            else{
+                con = transaction.getConnection();
+            }
+        }
+        catch(SQLException e){
+            throw new DataAccessException(e);
+        }
+        return con;
+    }
+
+    public void closeConnection(Connection con) throws DataAccessException{
+        if(con!=null)
+            return;
+        Transaction transaction = getCurrentTransaction();
+        try{
+            if (transaction == null){
+                cp.closeConnection(con);
+            }
+        }
+        catch(SQLException e){
+            throw new DataAccessException(e);
+        }
+    }
 
     public List<Map<String,Object>> query(String sql, Object[] args, int limit, int offset) throws DataAccessException{
         List<Map<String,Object>> data = new ArrayList<Map<String,Object>>();
@@ -36,7 +155,7 @@ public class DbClient {
         Connection conn = null;
         try{
         	long t1 = System.currentTimeMillis();
-            conn=this.cp.getConnection();
+            conn = getConnection();
             pstmt = conn.prepareStatement(sql);
             if (args != null){
                 for(int i=0; i<args.length; i++){
@@ -87,7 +206,7 @@ public class DbClient {
                     pstmt.close();
                 }
                 if (conn != null){
-                    conn.close();
+                    closeConnection(conn);
                 }
             }
             catch(SQLException e){
@@ -110,7 +229,7 @@ public class DbClient {
         PreparedStatement pstmt = null;
         try{
         	long t1 = System.currentTimeMillis();
-            conn=this.cp.getConnection();
+            conn = getConnection();
             pstmt = conn.prepareStatement(sql);
             if (args != null){
                 for(int i=0; i<args.length; i++){
@@ -142,7 +261,7 @@ public class DbClient {
                     pstmt.close();
                 }
                 if(conn!=null){
-                    conn.close();
+                    closeConnection(conn);
                 }
             }
             catch(SQLException e){

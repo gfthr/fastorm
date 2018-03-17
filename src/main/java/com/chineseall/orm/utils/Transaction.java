@@ -1,4 +1,4 @@
-package com.chineseall.orm;
+package com.chineseall.orm.utils;
 
 import com.chineseall.orm.exception.TransactionException;
 
