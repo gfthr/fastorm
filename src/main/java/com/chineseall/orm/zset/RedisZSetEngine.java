@@ -236,7 +236,7 @@ public class RedisZSetEngine extends ZSetEngine{
         return this.__load_value_pairs(values);
     }
 
-    /* TODO 此函数 不同于 riceball的函数 需要验证一下 ,实现在一个评分区间内,获得特定值前后的记录*/
+    /* TODO 此函数 不同于 riceball的函数 需要验证一下 ,实现在一个评分区间内,获得特定值前后的记录,特定值是第一条 */
     private List<ZSetValuePair> __scan_with_key(ZSetModel instance, String key_start, double score_start, double score_end, int limit,
                                                 boolean reverse){
         boolean ascending = instance.zset_score_ascending ^ reverse;

@@ -148,7 +148,7 @@ public class MybatisController {
     @RequestMapping("/otherzset")
     public List<Object> otherZSet()
     {
-        OtherZset zset=OtherZset.get("1",true);
+        OtherZset zset = OtherZset.get("1",true);
         List<Object> list = zset.all(false);
         log.error("list: "+list);
 
