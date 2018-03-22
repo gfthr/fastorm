@@ -126,11 +126,16 @@ public class ZSetModel {
         return this.zset_engine.score(this, value);
     }
 
-    /* :param score_start: inclusive if not key_score, else exclusive
+    /*
+    此方法 用于 获得特定值前后的数据
+
+    :param score_start: inclusive if not key_score, else exclusive
        :param score_end: inclusive
        :type limit: int
        :param key_start: exclusive，若不需指定则设置 '' 或 None
    */
+    //zset.scan("16",47.0f,22.0f,1,false); 降序方式的调用
+    //zset.scan("16",22.0f,47.0f,1,false); 升序方式的调用
     public List<ZSetValuePair> scan(String key_start, double score_start, double score_end, int limit, boolean reverse){
         return this.zset_engine.scan(this, key_start, score_start, score_end, limit, reverse);
     }

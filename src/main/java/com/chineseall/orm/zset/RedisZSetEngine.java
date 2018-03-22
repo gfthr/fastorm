@@ -251,8 +251,8 @@ public class RedisZSetEngine extends ZSetEngine{
             double start = key_start_score>score_start?key_start_score:score_start;
             values= RedisClient.getResource().zrangeByScoreWithScores(instance.general_key(),start, score_end,0,limit);
         }else{
-            double end = key_start_score<score_end?key_start_score:score_end;
-            values= RedisClient.getResource().zrevrangeByScoreWithScores(instance.general_key(),score_start, end,0,limit);
+            double start = key_start_score<score_start?key_start_score:score_start;
+            values= RedisClient.getResource().zrevrangeByScoreWithScores(instance.general_key(),start, score_end,0,limit);
         }
         if(values==null)
             return new ArrayList<>();

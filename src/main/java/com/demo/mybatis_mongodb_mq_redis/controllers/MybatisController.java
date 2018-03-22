@@ -190,11 +190,19 @@ public class MybatisController {
         List<Object> listrebuild = zset.all(false);
         log.error("listrebuild:  "+ listrebuild);
 
-        List<ZSetValuePair> allscans =  zset.scan(null,22.0f,44.0f,2,false);
+        //获得特定值前后的数据
+        List<ZSetValuePair> allscans =  zset.scan("12",Double.MAX_VALUE,0,2,false);
         log.error("allscans :"+allscans.size());
         for (ZSetValuePair pair:
                 allscans) {
             log.error("allscans :  "+pair.getValue()+" --- "+pair.getScore());
+        }
+
+        List<ZSetValuePair> allscansAsc =  zset.scan("12",0,Double.MAX_VALUE,2,true);
+        log.error("allscansAsc :"+allscansAsc.size());
+        for (ZSetValuePair pair:
+                allscansAsc) {
+            log.error("allscansAsc :  "+pair.getValue()+" --- "+pair.getScore());
         }
 
         zset.delete();
