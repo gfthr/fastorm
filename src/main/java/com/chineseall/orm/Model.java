@@ -6,9 +6,12 @@ import com.chineseall.orm.field.IdField;
 import com.chineseall.orm.proxy.BaseTypeHandler;
 import com.chineseall.orm.proxy.ListHandler;
 import com.chineseall.orm.proxy.MapHandler;
+import com.chineseall.orm.storage.CacheEngine;
 import com.chineseall.orm.storage.ModelEngine;
 import com.chineseall.orm.utils.ConvertUtil;
 import com.chineseall.orm.utils.Setting;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Field;
@@ -22,6 +25,7 @@ import java.util.*;
 
 
 public abstract class Model<T> {
+    private static Log log = LogFactory.getLog("Model");
     private boolean modified = true;
     private boolean model_saved = false;
     private boolean isproxy = false;
@@ -188,6 +192,18 @@ public abstract class Model<T> {
     public void delete() throws FastOrmException {
         getModelEngine().delete(this.tuple_key());
     }
+
+    public static void clearCache(Class<?> classz, Object[] key){
+        ModelEngine engine = ModelProxy.getModelEngine(classz);
+        if(engine instanceof CacheEngine){
+            try {
+                ((CacheEngine) engine).clear_cache(key);
+            }catch (Exception e){
+                log.error("CacheEngine clear_cache error key:"+key);
+            }
+        }
+    }
+
 
     public static <T> T create(Class<?> classz, Object[] key, Map<?, ?> iniValue) throws FastOrmException {
         // 1)创建代理类,解决属性变化的监听问题

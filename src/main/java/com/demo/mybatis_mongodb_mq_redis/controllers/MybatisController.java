@@ -213,5 +213,19 @@ public class MybatisController {
     }
 
 
+    @RequestMapping("/book")
+    public UniqueBook uniqueBook()
+    {
+        UniqueBook uniqueBook = null;
+        try {
+            uniqueBook = UniqueBook.fetch(UniqueBook.class, new Object[]{"good"},false);
+            UniqueBook.clearCache(UniqueBook.class,new Object[]{"good"});
+            System.out.print("uniqueBook "+uniqueBook.getId());
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+        return uniqueBook;
+    }
+
 
 }

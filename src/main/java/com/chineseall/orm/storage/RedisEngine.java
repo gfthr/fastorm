@@ -23,7 +23,7 @@ public class RedisEngine<T> extends ModelEngine<T>{
     }
 
     private int _redis_expire_sec(int expire_sec){
-        if(expire_sec==0){
+        if(expire_sec<=0){
             Random r = new Random();
             int sec = (int) Math.floor(Setting.redis_model_expired_seconds*(1+r.nextFloat()));
             return sec;
