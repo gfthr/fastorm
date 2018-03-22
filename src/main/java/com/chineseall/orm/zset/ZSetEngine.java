@@ -39,7 +39,7 @@ public abstract class ZSetEngine {
     public abstract long delete(ZSetModel instance);
 
     //检查是否需要 rebuild，若需要则 rebuild
-    public abstract boolean check_rebuild(ZSetModel instance);
+    public abstract void check_rebuild(ZSetModel instance);
 
     public abstract void rebuild(ZSetModel instance);
 

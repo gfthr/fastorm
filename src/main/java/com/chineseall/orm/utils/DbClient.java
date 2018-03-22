@@ -130,7 +130,7 @@ public class DbClient {
     }
 
     public void closeConnection(Connection con) throws DataAccessException{
-        if(con!=null)
+        if(con==null)
             return;
         Transaction transaction = getCurrentTransaction();
         try{

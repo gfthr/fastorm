@@ -1,6 +1,8 @@
 package com.chineseall.orm.zset;
 
 import com.chineseall.orm.utils.Setting;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -13,6 +15,7 @@ import java.util.Map;
  * Created by wangqiang on 2018/3/19.
  */
 public class ZSetModel {
+    private static Log log = LogFactory.getLog("ZSetModel");
     // nonemark
     private boolean noneMark;
     // 最后一次 check_rebuild 的时间
@@ -27,18 +30,30 @@ public class ZSetModel {
 
     private Object[] keys;
 
-    public ZSetModel(Object[] keys, boolean check_rebuild){
+    protected ZSetModel(String identifier, ZSetSource source, ZSetEngine engine, Object[] keys, boolean check_rebuild){
+        this.init(identifier,source,engine,keys,check_rebuild);
+    }
+
+    protected ZSetModel(String identifier, ZSetSource source, ZSetEngine engine, Object key, boolean check_rebuild){
+        Object[] keys =new Object[]{key};
+        this.init(identifier,source,engine,keys,check_rebuild);
+    }
+
+    private void init(String identifier, ZSetSource source, ZSetEngine engine, Object[] keys, boolean check_rebuild){
+        this.identifier = identifier;
+        this.zset_source = source;
+        this.zset_engine = engine;
+
         this.zset_engine.init_instance(this);
         this.keys = keys;
         if(check_rebuild)
             this.zset_engine.check_rebuild(this);
     }
 
-    public ZSetModel(Object key, boolean check_rebuild){
-        this.zset_engine.init_instance(this);
-        this.keys = new Object[]{key};
-        if(check_rebuild)
-            this.zset_engine.check_rebuild(this);
+
+    public static ZSetModel get(Object[] keys, boolean check_rebuild) {
+        log.error("not implement!! get(Object[] keys, boolean check_rebuild) ");
+        return null;
     }
 
     public boolean isNoneMark() {
@@ -71,9 +86,6 @@ public class ZSetModel {
         return String.format("%s%s|%s", Setting.REAL_CACHE_LOCAL_PREFIX, classz.getName(),key_str);
     }
 
-    public static ZSetModel get(Object[] keys, boolean check_rebuild){
-        return new ZSetModel(keys, check_rebuild);
-    }
 
     public void add(String value, Double score){
         Map<String,Double> map=new HashMap<>();
@@ -119,7 +131,7 @@ public class ZSetModel {
        :type limit: int
        :param key_start: exclusive，若不需指定则设置 '' 或 None
    */
-    public List<ZSetValuePair> scan(String key_start, int score_start, int score_end, int limit, boolean reverse){
+    public List<ZSetValuePair> scan(String key_start, double score_start, double score_end, int limit, boolean reverse){
         return this.zset_engine.scan(this, key_start, score_start, score_end, limit, reverse);
     }
 
@@ -159,8 +171,8 @@ public class ZSetModel {
     }
 
     // 检查是否需要 rebuild
-    public boolean check_rebuild(){
-        return this.zset_engine.check_rebuild(this);
+    public void check_rebuild(){
+        this.zset_engine.check_rebuild(this);
     }
 
     public void rebuild(){

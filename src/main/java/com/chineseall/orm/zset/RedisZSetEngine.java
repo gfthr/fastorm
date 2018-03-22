@@ -13,7 +13,7 @@ import static com.chineseall.orm.utils.RedisClient.getResource;
 /**
  * Created by wangqiang on 2018/3/20.
  */
-public class RedisZSetEngine {
+public class RedisZSetEngine extends ZSetEngine{
     /*
     对于一个实体的 <CacheKey>，在 redis 里会有以下相关存储。
     <CacheKey>|LastRebuildSec = <TimestampSec>

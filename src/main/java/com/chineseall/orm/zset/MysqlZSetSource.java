@@ -37,8 +37,8 @@ public class MysqlZSetSource extends ZSetSource{
             List<Map<String,Object>> rows = dbClient.query(this.view, params,0,0);
             for (Map<String,Object> map:
                     rows) {
-                String value=(String) map.get(value_column);
-                Double score=Double.parseDouble((String) map.get(score_column));
+                String value=""+ map.get(value_column);
+                Double score=Double.parseDouble(""+map.get(score_column));
                 datas.add(new ZSetValuePair(value, score));
             }
 

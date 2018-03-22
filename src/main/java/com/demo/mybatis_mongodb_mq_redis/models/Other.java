@@ -11,7 +11,7 @@ import java.util.Map;
 @Table(name = "other", generate = GeneratorType.AUTO, engine = ModelEngineType.CACHE_MYSQL_OBJECT)
 public class Other extends ModelObject<Other> {
     @Id
-    @Column
+    @Column()
     private Integer id;
     @Column
     private String desc;
@@ -21,6 +21,12 @@ public class Other extends ModelObject<Other> {
     private List<String> config;
     @Column
     private Map<String,Object> map;
+
+    @Column
+    private Integer platform;
+
+    @Column
+    private Integer rank;
 
 
     public Integer getId() {
@@ -59,5 +65,21 @@ public class Other extends ModelObject<Other> {
 
     public void setMap(Map<String, Object> map) {
         this.map = map;
+    }
+
+    public Integer getPlatform() {
+        return platform;
+    }
+
+    public void setPlatform(Integer platform) {
+        this.platform = platform;
+    }
+
+    public Integer getRank() {
+        return rank;
+    }
+
+    public void setRank(Integer rank) {
+        this.rank = rank;
     }
 }

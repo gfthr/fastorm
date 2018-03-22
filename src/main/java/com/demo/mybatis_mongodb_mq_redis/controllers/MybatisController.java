@@ -1,24 +1,21 @@
 package com.demo.mybatis_mongodb_mq_redis.controllers;
 
 import com.chineseall.orm.utils.DbClient;
-import com.demo.mybatis_mongodb_mq_redis.models.Auto;
-import com.demo.mybatis_mongodb_mq_redis.models.Mybatis;
-import com.demo.mybatis_mongodb_mq_redis.models.Other;
-import com.demo.mybatis_mongodb_mq_redis.models.User;
+import com.chineseall.orm.zset.ZSetValuePair;
+import com.demo.mybatis_mongodb_mq_redis.models.*;
 import com.demo.mybatis_mongodb_mq_redis.services.IMybatisService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("test")
 public class MybatisController {
-
+    private static Log log = LogFactory.getLog("MybatisController");
     @Resource
     private IMybatisService mybatisService;
 
@@ -72,6 +69,7 @@ public class MybatisController {
     {
         Other other = null;
         try {
+            Random r = new Random();
             other = Other.create(Other.class, null,null);
             other.setDesc("good:add" + System.currentTimeMillis());
             other.setName("name1");
@@ -83,6 +81,8 @@ public class MybatisController {
             map.put("key1","key1value");
             map.put("key2","key2value");
             other.setMap(map);
+            other.setPlatform(r.nextInt(5));
+            other.setRank(r.nextInt(100));
             other.save();
             System.out.print("Other "+other.getId());
         }catch (Exception ex){
@@ -143,6 +143,65 @@ public class MybatisController {
             ex.printStackTrace();
         }
         return others;
+    }
+
+    @RequestMapping("/otherzset")
+    public List<Object> otherZSet()
+    {
+        OtherZset zset=OtherZset.get("1",true);
+        List<Object> list = zset.all(false);
+        log.error("list: "+list);
+
+        ZSetValuePair first = zset.first();
+        log.error("first:  "+first.getValue()+":"+first.getScore());
+
+        ZSetValuePair last = zset.last();
+        log.error("last:  "+last.getValue()+":"+last.getScore());
+
+        long size1= zset.size();
+        log.error("size1 :  "+size1);
+
+        zset.add("25", 47.0);
+        List<Object> listadd = zset.all(false);
+        log.error("listadd:  "+listadd);
+
+        Double first_score = zset.first_score();
+        log.error("first_score:  "+first_score);
+
+        Double last_score = zset.last_score();
+        log.error("last_score:  "+last_score);
+
+        long rank = zset.rank("12", false);
+        log.error("rank 12:  "+rank);
+
+        long size= zset.size();
+        log.error("size :  "+size);
+
+        List<ZSetValuePair> alldatas = zset.range_with_score(0,8,false);
+        log.error("alldatas :"+alldatas.size());
+        for (ZSetValuePair pair:
+                alldatas) {
+            log.error("alldatas :  "+pair.getValue()+" --- "+pair.getScore());
+        }
+
+        log.error("score 12 "+ zset.score("12"));
+
+        zset.rebuild();
+        List<Object> listrebuild = zset.all(false);
+        log.error("listrebuild:  "+ listrebuild);
+
+        List<ZSetValuePair> allscans =  zset.scan(null,22.0f,44.0f,2,false);
+        log.error("allscans :"+allscans.size());
+        for (ZSetValuePair pair:
+                allscans) {
+            log.error("allscans :  "+pair.getValue()+" --- "+pair.getScore());
+        }
+
+        zset.delete();
+        List<Object> listdel = zset.all(false);
+        log.error("listdel:  "+listdel);
+
+        return list;
     }
 
 
