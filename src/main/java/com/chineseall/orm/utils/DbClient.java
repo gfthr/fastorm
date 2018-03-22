@@ -217,6 +217,20 @@ public class DbClient {
         return data;
     }
 
+    public int count(String sql, Object[] args)throws DataAccessException{
+        List<Map<String,Object>> result = this.query(sql, args,0,0);
+        if(result!=null && result.size()>0 ){
+            Map<String,Object> map = result.get(0);
+            int raw_value =0 ;
+            for (Map.Entry<String,Object> entry : map.entrySet()) {
+                raw_value =Integer.parseInt((String) entry.getValue());
+            }
+            return raw_value;
+        }else{
+            return 0;
+        }
+    }
+
     public Object[] execute(String sql, Object[] args, boolean isInsert) throws DataAccessException{
         Object[] result= new Object[]{0,null};
 

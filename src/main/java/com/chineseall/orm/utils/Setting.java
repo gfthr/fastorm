@@ -9,5 +9,8 @@ public class Setting {
 
     public static final int nonemark_expired_seconds = 9996;
 
+    public static final int zset_rebuild_seconds=3615*36*3;
+    public static final int zset_expired_seconds=3616*36*3;
+
 
 }
