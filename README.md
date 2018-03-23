@@ -20,7 +20,7 @@ Forget hibernate and mybatis it, fastOrm will achieve the best Java and Orm base
 
 # 基本使用
 
-* [example link](http://example.com/).
+* [example link](http://example.com/)
 
-* [example link](http://example.com/).
+* [example link](http://example.com/)
 
