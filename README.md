@@ -18,7 +18,9 @@ Forget hibernate and mybatis it, fastOrm will achieve the best Java and Orm base
 
 6）支持基于乐观锁的更新，支持删除标志的删除（假删除）
 
-* This is an [example link](http://example.com/).
+# 基本使用
 
-* This is an [example link](http://example.com/).
+* [example link](http://example.com/).
+
+* [example link](http://example.com/).
 
